@@ -6,11 +6,11 @@ from copy import deepcopy
 from scipy.spatial.transform import Rotation as R
 
 def load_json(path:str):
-    
+
     """Check the path and read the json file.
     Args:
         path (str): the path of the json file.
-    Returns: 
+    Returns:
         the data in the json file.
     """
     assert os.path.exists(path)
@@ -20,17 +20,17 @@ def load_json(path:str):
 
 def read_annotation_pickle(path:str, show_progress:bool =True):
     """
-    Read annotation pickle file and return a dictionary, the embodiedscan annotation for 
+    Read annotation pickle file and return a dictionary, the embodiedscan annotation for
     all scans in the split.
 
     Args:
         path (str): the path of the annotation pickle file.
         show_progress (bool): whether showing the progress.
-    Returns: 
-        dict: A dictionary. 
-            scene_id : (bboxes, object_ids, object_types, visible_view_object_dict, 
+    Returns:
+        dict: A dictionary.
+            scene_id : (bboxes, object_ids, object_types, visible_view_object_dict,
             extrinsics_c2w, axis_align_matrix, intrinsics, image_paths)
-            
+
             bboxes: numpy array of bounding boxes, shape (N, 9): xyz, lwh, ypr
             object_ids: numpy array of obj ids, shape (N,)
             object_types: list of strings, each string is a type of object
@@ -42,7 +42,7 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
     """
     with open(path, "rb") as f:
         data = np.load(f, allow_pickle=True)
-        
+
     metainfo = data["metainfo"]
     object_type_to_int = metainfo["categories"]
     object_int_to_type = {v: k for k, v in object_type_to_int.items()}
@@ -56,7 +56,7 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
         #print(datalist[scene_idx].keys())
         images = datalist[scene_idx]["images"]
         #print(images[0].keys())
-        
+
         intrinsic = datalist[scene_idx].get("cam2img", None)  # a 4x4 matrix
         missing_intrinsic = False
         if intrinsic is None:
@@ -69,7 +69,7 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
                 "depth_cam2img"
             ]  # a 4x4 matrix, for scannet
         axis_align_matrix = datalist[scene_idx]["axis_align_matrix"]  # a 4x4 matrix
-     
+
         scene_id = datalist[scene_idx]['sample_idx']
 
         instances = datalist[scene_idx]["instances"]
@@ -98,16 +98,16 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
         depth_intrinsics = []
         image_paths = []
         depth_image_paths = []
-        
+
         for image_idx in range(len(images)):
             img_path = images[image_idx]["img_path"]  # str
             depth_image = images[image_idx]["depth_path"]
             extrinsic_id = img_path.split("/")[-1].split(".")[0]  # str
             cam2global = images[image_idx]["cam2global"]  # a 4x4 matrix
-            
+
             if missing_intrinsic:
                 intrinsic = images[image_idx]["cam2img"]
-                
+
                 depth_intrinsic = images[image_idx]["cam2img"]
             visible_instance_indices = images[image_idx][
                 "visible_instance_ids"
@@ -143,10 +143,10 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
 
 class id_mapping:
     """
-       We rename the scan for consistency. 
+       We rename the scan for consistency.
        This class is used to map the original scan names to the new names.
     """
-    
+
     def __init__(self, mp3d_mapping_path):
         def reverse_dict(mapping):
             re_mapping = {mapping[k]:k for k in mapping.keys()}
@@ -156,8 +156,8 @@ class id_mapping:
             self.mp3d_mapping = json.load(f)
 
         self.mp3d_mapping_trans = reverse_dict(self.mp3d_mapping)
-      
-        
+
+
     def forward(self,scan_name):
         if 'matterport3d/' in scan_name:
             scan_,region_ = self.mp3d_mapping[scan_name.split('/')[1]],scan_name.split('/')[2]
@@ -168,25 +168,24 @@ class id_mapping:
             return scan_name.split('/')[1]
         else:
             raise ValueError(f"{scan_name} is not a scan name")
-          
+
     def backward(self,scan_name):
         if '1mp3d' in scan_name:
-            scene1,scene2,region = scan_name.split('_')      
+            scene1,scene2,region = scan_name.split('_')
             return 'matterport3d/'+self.mp3d_mapping_trans[scene1+'_'+scene2]+'/'+region
         elif '3rscan' in scan_name:
             return '3rscan/'+scan_name
         elif 'scene' in scan_name:
             return 'scannet/'+scan_name
         else:
-            raise ValueError(f"{scan_name} is not a scan name") 
-        
+            raise ValueError(f"{scan_name} is not a scan name")
+
 if __name__ == "__main__":
     old_path = "/mnt/petrelfs/linjingli/mmscan_db/mmscan_data/embodiedscan-split/embodiedscan-v1/embodiedscan_infos_val.pkl"
-    
+
     new_path = "/mnt/petrelfs/linjingli/mmscan_db/mmscan_data/embodiedscan-split/embodiedscan-v2/embodiedscan_infos_val.pkl"
-    
+
     single_mp3d = "/mnt/petrelfs/linjingli/mmscan_db/mmscan_data/embodiedscan_info/1mp3d_0002_region20.pkl"
-    
+
     data1 = read_annotation_pickle(new_path)
     print(data1[list(data1.keys())[1]]['image_paths'])
-    

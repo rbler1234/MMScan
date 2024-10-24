@@ -6,7 +6,7 @@ try:
     from pytorch3d.ops import box3d_overlap
 except ImportError:
     box3d_overlap = None
-    
+
 
 def _axis_angle_rotation(axis: str, angle: np.ndarray) -> np.ndarray:
     """
@@ -109,21 +109,21 @@ def normalize_box(scene_pcd, embodied_scan_bbox):
     Args:
         scene_pcd (Tensor / ndarray):
              (..., 3)
-        embodied_scan_bbox (Tensor / ndarray): 
+        embodied_scan_bbox (Tensor / ndarray):
              (9,) 9 DoF box
 
     Returns:
         Tensor: Transformed 3D box of shape (N, 8, 3).
     """
-   
+
     bbox = np.array(embodied_scan_bbox)
     orientation=euler_to_matrix_np(bbox[np.newaxis,6:])[0]
     position=np.array(bbox[:3])
     size=np.array(bbox[3:6])
     obj_mask = np.array(is_inside_box(scene_pcd[:,:3],position,size,orientation),dtype=bool)
     obj_pc = scene_pcd[obj_mask]
-    
-    
+
+
     # resume the same if there's None
     if obj_pc.shape[0]<1:
         return embodied_scan_bbox[:6]
@@ -137,7 +137,7 @@ def normalize_box(scene_pcd, embodied_scan_bbox):
     return bbox
 
 def __9DOF_to_6DOF__(pcd_data, bbox_):
-    
+
     #that's a kind of loss of information, so we don't recommend
     return normalize_box(pcd_data, bbox_)
 
@@ -158,7 +158,7 @@ def bbox_to_corners(centers, sizes, rot_mat: torch.Tensor) -> torch.Tensor:
         centers = centers.reshape(-1, 3)
         sizes = sizes.reshape(-1, 3)
         rot_mat = rot_mat.reshape(-1, 3, 3)
-    
+
     n_box = centers.shape[0]
     if use_batch:
         assert n_box == batch_size * n_proposals

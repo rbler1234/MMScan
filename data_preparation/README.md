@@ -40,4 +40,3 @@ You are recommanded to create a soft link to the raw data folder under `MMScan_d
     python process_all_scan.py --nproc 8
     # If your various file directories do not match the configuration settings, define them using --
     ```
-

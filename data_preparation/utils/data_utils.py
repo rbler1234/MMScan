@@ -2,14 +2,14 @@ import numpy as np
 from tqdm import tqdm
 def read_annotation_pickle(path:str, show_progress:bool =True):
     """
-    Read annotation pickle file and return a dictionary, the embodiedscan annotation for 
+    Read annotation pickle file and return a dictionary, the embodiedscan annotation for
     all scans in the split.
 
     Args:
         path (str): the path of the annotation pickle file.
         show_progress (bool): whether showing the progress.
-    Returns: 
-        dict: A dictionary. 
+    Returns:
+        dict: A dictionary.
             scene_id : (bboxes, object_ids, object_types, visible_view_object_dict, extrinsics_c2w, axis_align_matrix, intrinsics, image_paths)
             bboxes: numpy array of bounding boxes, shape (N, 9): xyz, lwh, ypr
             object_ids: numpy array of obj ids, shape (N,)
@@ -22,7 +22,7 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
     """
     with open(path, "rb") as f:
         data = np.load(f, allow_pickle=True)
-        
+
     metainfo = data["metainfo"]
     object_type_to_int = metainfo["categories"]
     object_int_to_type = {v: k for k, v in object_type_to_int.items()}
@@ -36,7 +36,7 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
         #print(datalist[scene_idx].keys())
         images = datalist[scene_idx]["images"]
         #print(images[0].keys())
-        
+
         intrinsic = datalist[scene_idx].get("cam2img", None)  # a 4x4 matrix
         missing_intrinsic = False
         if intrinsic is None:
@@ -49,7 +49,7 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
                 "depth_cam2img"
             ]  # a 4x4 matrix, for scannet
         axis_align_matrix = datalist[scene_idx]["axis_align_matrix"]  # a 4x4 matrix
-     
+
         scene_id = datalist[scene_idx]['sample_idx']
 
         instances = datalist[scene_idx]["instances"]
@@ -78,16 +78,16 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
         depth_intrinsics = []
         image_paths = []
         depth_image_paths = []
-        
+
         for image_idx in range(len(images)):
             img_path = images[image_idx]["img_path"]  # str
             depth_image = images[image_idx]["depth_path"]
             extrinsic_id = img_path.split("/")[-1].split(".")[0]  # str
             cam2global = images[image_idx]["cam2global"]  # a 4x4 matrix
-            
+
             if missing_intrinsic:
                 intrinsic = images[image_idx]["cam2img"]
-                
+
                 depth_intrinsic = images[image_idx]["cam2img"]
             visible_instance_indices = images[image_idx][
                 "visible_instance_ids"

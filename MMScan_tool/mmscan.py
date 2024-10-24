@@ -26,7 +26,7 @@ ENV_PATH = os.path.abspath(__file__)
 class EmbodiedScan(Dataset):
     """
     Database class for MMScan to help query and retrieve information from the database.
-    
+
         Args:
             version (str): The version of the database, now only support v1.
             split (str): The split of the database, now only support train/val.
@@ -34,7 +34,7 @@ class EmbodiedScan(Dataset):
                                 download the Embodiedscan/MMScan datasets.
             verbose (bool): Whether to print the information or not.
             check_mode (bool): Whether to debug or not.
-                
+
     """
 
     def __init__(self,
@@ -46,43 +46,43 @@ class EmbodiedScan(Dataset):
                  ):
         """
             Initialize the database, prepare the embodeidscan annotation.
-            
+
         """
-        super(EmbodiedScan, self).__init__() 
+        super(EmbodiedScan, self).__init__()
         self.version = version
         if len(dataroot)>0:
             self.dataroot = dataroot
         else:
             self.dataroot = os.join(os.path.dirname(os.path.dirname(ENV_PATH)),'MMScan_data')
         self.verbose = verbose
-        
+
         # now we skip the test split between we don not provide ground truth for the test split.
         if split == 'test':
             split = 'val'
         self.split = split
-        
-        
+
+
         self.check_mode = check_mode
         if self.check_mode:
             print("embodiedscan's checking mode!!!")
-        
+
         # initially the task is not defined
         self.task = None
-        
+
         self.pkl_name = '{}/embodiedscan-split/embodiedscan-{}/embodiedscan_infos_{}.pkl'.\
             format(self.dataroot, self.version, split)
         self.data_path = '{}/embodiedscan-split/data'.format(self.dataroot)
         self.lang_anno_path = '{}/MMScan-beta-release'.format(self.dataroot)
-        
+
         self.pcd_path = '{}/embodiedscan-split/process_pcd'.format(self.dataroot)
         self.mapping_json_path = '{}/../data_preparation/meta-data/mp3d_mapping.json'.format(self.dataroot)
         self.id_mapping = id_mapping(self.mapping_json_path)
-        
-  
+
+
         self.table_names = ["point_clouds","bboxes","object_ids","object_types","object_type_ints",
                             "visible_view_object_dict","extrinsics_c2w","axis_align_matrix","intrinsics",
                             "depth_intrinsics","image_paths","depth_image_paths","visible_instance_ids"]
-        
+
         self.lang_tasks = \
         ["MMScan-QA","MMScan-VG","MMScan-DC"]
         self.task_anno_mapping = \
@@ -94,64 +94,64 @@ class EmbodiedScan(Dataset):
 
         if verbose:
             print("======\nLoading embodiedscan-{} database for split {}...".format(self.version,self.split))
-        
+
         # prepare the embodeidscan annotation.
         self.embodiedscan_anno = self.__load_base_anno__(self.pkl_name)
-  
+
     def __getitem__(self, index_):
-        
+
         """
             return the sample item corresponding to the index.
             The item contains:
             (1) scan-level
                 "ori_pcds" (tuple[tensor]):
                 the raw data read from the pth file,
-                contains in order (pcd coordinates, pcd colors, 
+                contains in order (pcd coordinates, pcd colors,
                 pcd class labels, pcd instance labels)
 
-                "pcds" (np.ndarray): 
-                the point cloud data of the scan, 
+                "pcds" (np.ndarray):
+                the point cloud data of the scan,
                 [n_points, 6(xyz+rgb)]
-            
-                "instance_labels" (np.ndarray): 
-                the object id of each point, 
-                [n_points,1]
-                
-                "class_labels" (np.ndarray): 
-                the class type of each point, 
+
+                "instance_labels" (np.ndarray):
+                the object id of each point,
                 [n_points,1]
 
-                "bboxes" (dict): 
+                "class_labels" (np.ndarray):
+                the class type of each point,
+                [n_points,1]
+
+                "bboxes" (dict):
                 bounding boxes info
-                { object_id : 
-                {"type": object_type (str),  
-                 "bbox": 9 DoF box (np.ndarray), 
+                { object_id :
+                {"type": object_type (str),
+                 "bbox": 9 DoF box (np.ndarray),
                  ...}
 
-                "img" (list[dict]): 
+                "img" (list[dict]):
                  This won't be needed for now
-            
+
             (2) anno-level (for Visual Grounding task) / (for Question Answering task)
-            
+
             Args:
                 index_ (int): the index
             Returns:
                 dict: The sample item corresponding to the index.
-                
+
         """
         assert self.task is not None, "Please set the task first!"
-        
+
         # (1) store the "index" info
         data_dict = {}
         data_dict["index"] = index_
-        
+
 
         # (2) loading the data
         scan_idx = self.MMScan_collect["anno"][index_]["scan_id"]
-        pcd_info = self.__process_pcd_info__(scan_idx) 
+        pcd_info = self.__process_pcd_info__(scan_idx)
         images_info = self.__process_img_info__(scan_idx)
         box_info = self.__process_box_info__(scan_idx)
-        
+
         data_dict["ori_pcds"] = pcd_info['ori_pcds']
         data_dict["pcds"] = pcd_info['pcds']
         data_dict["obj_pcds"] = pcd_info['obj_pcds']
@@ -159,22 +159,22 @@ class EmbodiedScan(Dataset):
         data_dict['class_labels'] = pcd_info['class_labels']
         data_dict["bboxes"] = box_info
         #sdata_dict["images"] = images_info
-        
+
         # (3) loading the data from the collection
         # necessary to use deepcopy?
         data_dict.update(deepcopy(self.MMScan_collect["anno"][index_]))
-        
-        return data_dict
-            
 
-    
+        return data_dict
+
+
+
     def __len__(self):
         assert self.task is not None, "Please set the task first!"
         return len(self.MMScan_collect["anno"])
 
     @property
     def show_possess(self) -> List[str]:
-        """ 
+        """
             Returns:
                 list[str]: All data classes present in Embodiedscan database.
         """
@@ -182,49 +182,49 @@ class EmbodiedScan(Dataset):
 
     @property
     def show_mmscan_id(self) -> List[str]:
-        """ 
+        """
             Returns:
                 list[str]: All data classes present in Embodiedscan database.
         """
         assert self.task is not None, "Please set the task first!"
         return self.mmscan_scan_id
-    
+
     @property
     def samples(self):
-        """ 
+        """
             Returns:
                 list[dict]: All samples in the MMScan language task.
         """
         assert self.task is not None, "Please set the task first!"
         return self.MMScan_collect["anno"]
-    
+
     def set_lang_task(self, lang_task: str = "MMScan-QA", ratio: float = 1.0, token_flatten: bool = True):
-        """ 
+        """
             Setting the mode to adapt for the specific language task.
             (1) Loading the language annotation from MMScan.
             (2) Collecting the basic data from embodiedscan datasets
-            
+
             Args:
                 lang_task (str): The language task to adapt for("MMScan-QA"/"MMScan-VG")
                 ratio (float): Sample from the samples with a ratio
-                token_flatten (bool): Only for MMScan-VG task, whether to flatten the tokens or not. 
-                
+                token_flatten (bool): Only for MMScan-VG task, whether to flatten the tokens or not.
+
         """
         assert self.task_anno_mapping.get(lang_task,None) is not None, \
             "Task {} is not supported yet".format(lang_task)
         self.task = lang_task
-        
+
         if self.verbose:
             print("==================\nNow the task is {}".format(self.task))
             start = time.time()
-        
+
         # (1) Loading the language annotation from MMScan.
         self.mmscan_scan_id = load_json(f'{self.lang_anno_path}/Data_splits/{self.split}-split.json')
         self.mmscan_anno = \
             load_json(f'{self.lang_anno_path}/MMScan_samples/{self.task_anno_mapping[lang_task]}')[self.split]
-        
+
         if self.check_mode:
-            self.mmscan_anno = self.mmscan_anno[:100]   
+            self.mmscan_anno = self.mmscan_anno[:100]
         if ratio < 1.0:
             self.mmscan_anno = self.__downsample_annos__(self.mmscan_anno,ratio)
         if self.task == "MMScan-VG" and token_flatten:
@@ -233,27 +233,27 @@ class EmbodiedScan(Dataset):
             self.mmscan_anno = self.__filter_lang_anno__(self.mmscan_anno)
             print("==================\nAfter filtering, clear {} samples from {} samples. "\
                 .format(ori_len-len(self.mmscan_anno),ori_len))
-    
-            
+
+
         if self.verbose:
             end = time.time()
             print("==================\nLoading {} split for the {} task, using {} seconds"\
                 .format(self.split,self.task,end-start))
             start = time.time()
-        
+
         # (2) Collecting the basic data from embodiedscan datasets
         self.data_collect()
-        
-        
+
+
         if self.verbose:
             end = time.time()
             print("==================\nCollecting the data uses {} seconds".format(end-start))
 
-            
+
 
     def get_possess(self, table_name: str, scan_idx: str):
         """ Getting all database about the scan from embodeidscan.
-            
+
             Args:
                 table_name (str): type of the expected data.
                 scan_idx (str): The scan id to get the data.
@@ -262,27 +262,27 @@ class EmbodiedScan(Dataset):
         """
         assert table_name in self.table_names, \
             "Table {} not found".format(table_name)
-        
+
         return torch.load(\
             f'{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth') if\
             table_name == "point_clouds" else self.embodiedscan_anno[scan_idx][table_name]
 
-    
+
     def data_collect(self)->dict:
-        """ 
+        """
             Collecting the MMScan samples.
             Store them in self.MMScan_collect.
             MMScan QA samples need to be flatten.
         """
-       
+
         assert self.task is not None, "Please set the task first!"
         self.MMScan_collect = {}
-        
-        
+
+
         #  MMScan anno processing
         if self.task == "MMScan-QA":
             self.MMScan_collect["anno"] = []
-            
+
             for sample in self.mmscan_anno:
                 if self.split == 'train':
                     for answer in sample["answers"]:
@@ -291,36 +291,36 @@ class EmbodiedScan(Dataset):
                         self.MMScan_collect["anno"].append(sub_sample)
                 else:
                     self.MMScan_collect["anno"].append(sample)
-              
+
         elif self.task == "MMScan-VG":
             self.MMScan_collect["anno"] = self.mmscan_anno
         else:
             raise NotImplementedError
- 
-    
+
+
     def __filter_lang_anno__(self, samples):
-        """ 
+        """
             Check and  the annotation is valid or not.
-            
+
             Args:
                 samples (list[dict]): The samples.
             Returns:
                 list[dict] : The filtered results.
         """
-        
+
         if self.task != "MMScan-VG":
             return samples
-        
+
         filtered_samples = []
         for sample in samples:
             if self.__check_lang_anno__(sample):
                 filtered_samples.append(sample)
         return filtered_samples
-            
+
     def __check_lang_anno__(self, sample) -> bool:
-        """ 
+        """
             Check if the item of the annotation is valid or not.
-            
+
             Args:
                 sample (dict): The item from the samples.
             Returns:
@@ -329,51 +329,51 @@ class EmbodiedScan(Dataset):
         if self.task == "MMScan-VG":
             return len(sample["target"])==len(sample['target_id']) \
                 and len(sample['target_id'])>0
-        
+
         return True
-           
+
     def __load_base_anno__(self, pkl_path) -> dict:
-        """ 
-            Load the embodiedscan pkl file, it will return 
+        """
+            Load the embodiedscan pkl file, it will return
             the embodiedscan annotations of all scans in the
             corresponding split.
-            
+
             Args:
                 pkl_path (str): The path of the pkl.
             Returns:
-                dict : The embodiedscan annotations of scans. 
+                dict : The embodiedscan annotations of scans.
                 (with scan_idx as keys)
-                
+
         """
         return read_annotation_pickle(pkl_path,show_progress=self.verbose)
-    
+
 
     def __process_pcd_info__(self, scan_idx: str):
-        """ 
-            Retrieve the corresponding scan information based 
+        """
+            Retrieve the corresponding scan information based
             on the input scan ID, including original data, point
-            clouds, object pointclouds, instance labels and the 
+            clouds, object pointclouds, instance labels and the
             center of the scan.
-            
+
             Args:
                 scan_idx (str): the scan ID.
             Returns:
                 dict : corresponding scan information.
-                
+
         """
-  
+
         assert scan_idx in self.embodiedscan_anno.keys(), \
             "Scan {} is not in {} split".format(scan_idx,self.split)
-        
+
         scan_info = {}
         pcd_data = torch.load(\
             f'{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth')
         points, colors, class_labels, instance_labels = pcd_data
-        
+
         pcds = np.concatenate([points, colors], 1)
         scan_info['ori_pcds'] = deepcopy(pcd_data)
         scan_info['pcds'] = deepcopy(pcds)
-        
+
         obj_pcds = {}
         for i in range(instance_labels.max() + 1):
             mask = instance_labels == i
@@ -386,25 +386,25 @@ class EmbodiedScan(Dataset):
         scan_info['instance_labels'] = np.array(instance_labels)
         scan_info['class_labels'] = np.array(class_labels)
         return scan_info
-    
+
     def __process_box_info__(self, scan_idx: str):
-        """ 
-            Retrieve the corresponding bounding boxes 
+        """
+            Retrieve the corresponding bounding boxes
             information based on the input scan ID.
-            For each object, this function will return 
-            its ID, type, bounding boxes in format of 
+            For each object, this function will return
+            its ID, type, bounding boxes in format of
             {ID: {"bbox":bbox, "type":type}}
-            
+
             Args:
                 scan_idx (str): the scan ID.
             Returns:
-                dict : corresponding bounding boxes 
+                dict : corresponding bounding boxes
                 information.
-                
+
         """
         assert scan_idx in self.embodiedscan_anno.keys(), \
             "Scan {} is not in {} split".format(scan_idx,self.split)
-        
+
         bboxes = \
             deepcopy(self.get_possess("bboxes",scan_idx))
         object_ids = \
@@ -413,25 +413,25 @@ class EmbodiedScan(Dataset):
             deepcopy(self.get_possess("object_types",scan_idx))
         return {object_ids[i]: {"bbox":bboxes[i], \
             "type":object_types[i]} for i in range(len(object_ids))}
-    
+
     def __process_img_info__(self, scan_idx: str):
-        """ 
-            Retrieve the corresponding camera information 
-            based on the input scan ID. For each camera, 
-            this function will return its intrinsics, 
+        """
+            Retrieve the corresponding camera information
+            based on the input scan ID. For each camera,
+            this function will return its intrinsics,
             extrinsics, image paths(both rgb & depth)
             and the visible object ids.
-            
+
             Args:
                 scan_idx (str): the scan ID.
             Returns:
-                list[dict] : corresponding information 
+                list[dict] : corresponding information
                 for each camera.
-                
+
         """
         assert scan_idx in self.embodiedscan_anno.keys(), \
             "Scan {} is not in {} split".format(scan_idx,self.split)
-        
+
         img_info = dict()
         img_info['img_paths'] = \
             deepcopy(self.get_possess("image_paths",scan_idx))
@@ -445,8 +445,8 @@ class EmbodiedScan(Dataset):
             deepcopy(self.get_possess("extrinsics_c2w",scan_idx))
         img_info['visible_instance_ids'] \
             = deepcopy(self.get_possess("visible_instance_ids",scan_idx))
-        
-    
+
+
         img_info_list = []
         for camera_index in range(len(img_info["img_paths"])):
             item = {}
@@ -454,47 +454,47 @@ class EmbodiedScan(Dataset):
                 item[possess] = img_info[possess][camera_index]
             img_info_list.append(item)
         return img_info_list
-    
-    
-    
+
+
+
     def down_9DOF_to_6DOF(self, pcd,\
         box_9DOF) -> np.ndarray:
-        """ 
-            Transform the 9DOF bounding box to 6DOF bounding box. 
-            Find the minimum bounding boxes to cover all the 
+        """
+            Transform the 9DOF bounding box to 6DOF bounding box.
+            Find the minimum bounding boxes to cover all the
             point clouds.
-            
+
             Args:
-                pcd(np.ndarray / Tensor): 
+                pcd(np.ndarray / Tensor):
                     the point clouds
-                box_9DOF(np.ndarray / Tensor): 
+                box_9DOF(np.ndarray / Tensor):
                     the 9DOF bounding box
             Returns:
-                np.ndarray : 
+                np.ndarray :
                     The transformed 6DOF bounding box.
-                
+
         """
-        
-      
+
+
         return __9DOF_to_6DOF__(pcd,box_9DOF)
-        
-    
+
+
     def __downsample_annos__(self, annos: List[dict], ratio: float):
-        """ 
-            downsample the annotations with a given ratio. 
-            
+        """
+            downsample the annotations with a given ratio.
+
             Args:
                 annos (list[dict]): the original annotations.
                 ratio (float): the ratio to downsample.
             Returns:
-                list[dict] : The result.      
+                list[dict] : The result.
         """
         d_annos = []
         for index in range(len(annos)):
             if index % int(1/ratio) == 0:
                 d_annos.append(annos[index])
         return d_annos
-  
+
 
 if __name__ =="__main__":
     test = EmbodiedScan(version='v1', split='val', verbose=True)

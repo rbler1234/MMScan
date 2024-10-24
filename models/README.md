@@ -1,1 +1,0 @@
-### Here will be the README.md to explain how the models is adapted to the API and provide the command to run them.

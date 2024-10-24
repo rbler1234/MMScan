@@ -25,7 +25,7 @@ def average_precision(recalls, precisions, mode='area'):
 
     num_scales = recalls.shape[0]
     ap = np.zeros(num_scales, dtype=np.float32)
-    
+
     if mode == 'area':
         zeros = np.zeros((num_scales, 1), dtype=recalls.dtype)
         ones = np.ones((num_scales, 1), dtype=recalls.dtype)
@@ -37,7 +37,7 @@ def average_precision(recalls, precisions, mode='area'):
             ind = np.where(mrec[i, 1:] != mrec[i, :-1])[0]
             ap[i] = np.sum(
                 (mrec[i, ind + 1] - mrec[i, ind]) * mpre[i, ind + 1])
-            
+
     elif mode == '11points':
         for i in range(num_scales):
             for thr in np.arange(0, 1 + 1e-3, 0.1):
@@ -53,9 +53,9 @@ def average_precision(recalls, precisions, mode='area'):
 def get_f1_scores(iou_matrix,iou_threshold):
     """
         Refer to the algorithm in Multi3DRefer to compute the F1 score.
-        
+
         Args:
-            iou_matrix (ndarray/tensor): 
+            iou_matrix (ndarray/tensor):
                 the iou matrix of the predictions and ground truths (shape n*m)
             iou_threshold (float): 0.25/0.5
 
@@ -81,22 +81,22 @@ def get_f1_scores(iou_matrix,iou_threshold):
 
     # calculate precision, recall and f1-score for the current scene
     f1_score = 2 * iou_thr_tp / (pred_bboxes_count + gt_bboxes_count)
-    
+
     return f1_score
-    
+
 def __get_fp_tp_array__(iou_array,iou_threshold):
-    
+
     """
         Compute the False-positive and True-positive array for each prediction.
-        
+
         Args:
-            iou_array (ndarray/tensor): 
-                the iou matrix of the predictions and ground truths 
+            iou_array (ndarray/tensor):
+                the iou matrix of the predictions and ground truths
                 (shape len(preds)*len(gts))
             iou_threshold (float): 0.25/0.5
 
         Returns:
-            np.ndarray, np.ndarray: (len(preds)), 
+            np.ndarray, np.ndarray: (len(preds)),
             the false-positive and true-positive array for each prediction.
     """
     gt_matched_records = np.zeros((len(iou_array[0])), dtype=bool)
@@ -114,8 +114,8 @@ def __get_fp_tp_array__(iou_array,iou_threshold):
                 if iou > iou_max:
                     iou_max = iou
                     jmax = j
-        
-        
+
+
         if iou_max >= iou_threshold:
             if not gt_matched_records[jmax]:
                 gt_matched_records[jmax] = True
@@ -124,11 +124,11 @@ def __get_fp_tp_array__(iou_array,iou_threshold):
                 fp_thr[d] = 1.0
         else:
             fp_thr[d] = 1.0
-            
-    return fp_thr,tp_thr     
+
+    return fp_thr,tp_thr
 
 def get_average_precision(iou_array,iou_threshold):
-    
+
     fp,tp = __get_fp_tp_array__(iou_array,iou_threshold)
     fp_cum = np.cumsum(fp)
     tp_cum = np.cumsum(tp)
@@ -139,7 +139,7 @@ def get_average_precision(iou_array,iou_threshold):
 
 
 def get_multi_topk_scores(iou_array, iou_threshold, mode='sigma'):
-    
+
     """
         Compute the multi-topk metric, we provide two modes.
         "simple": 1/N *Hit(min(N*k,len(pred)))
@@ -148,8 +148,8 @@ def get_multi_topk_scores(iou_array, iou_threshold, mode='sigma'):
             M predictions.
             N = the number of gtound truths
         Args:
-            iou_array (ndarray/tensor): 
-                the iou matrix of the predictions and ground truths 
+            iou_array (ndarray/tensor):
+                the iou matrix of the predictions and ground truths
                 (shape len(preds)*len(gts))
             iou_threshold (float): 0.25/0.5
             mode (str): 'sigma'/'simple'
@@ -157,7 +157,7 @@ def get_multi_topk_scores(iou_array, iou_threshold, mode='sigma'):
         Returns:
             float : the score
     """
-    
+
     assert mode in ['sigma','simple']
     topk_scores = []
     gt_matched_records = np.zeros(len(iou_array[0]))
@@ -174,9 +174,9 @@ def get_multi_topk_scores(iou_array, iou_threshold, mode='sigma'):
         if iou_max >= iou_threshold:
             gt_matched_records[j_max] = True
         topk_scores.append(gt_matched_records.copy())
-    
-    topk_results = {} 
-    for topk in [1,3,5,10]:   
+
+    topk_results = {}
+    for topk in [1,3,5,10]:
         if mode == 'sigma':
             scores =  [int(np.sum(topk_scores[min(n*topk, \
                 len(topk_scores))-1])>=n) for n in range(1,num_gt+1)]
@@ -186,5 +186,3 @@ def get_multi_topk_scores(iou_array, iou_threshold, mode='sigma'):
             result = np.sum(topk_scores[query_index]) / num_gt
         topk_results[f'Acc_top{topk}@{iou_threshold}'] = result
     return topk_results
-
-        

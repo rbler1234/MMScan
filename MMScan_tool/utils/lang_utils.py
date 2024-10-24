@@ -4,15 +4,15 @@ import string
 import numpy as np
 
 def clean_answer(data):
-    
+
     """ Help to clean and unify the sentence.
-        
+
         Args:
             data (str): the raw sentence.
         Returns:
             data (str): the processed sentence.
     """
-    
+
     data = data.lower()
     data = re.sub('[ ]+$' ,'', data)
     data = re.sub('^[ ]+' ,'', data)
@@ -93,12 +93,12 @@ def exact_match_score(prediction, ground_truth):
     Args:
         prediction (str): thr predicted answer.
         ground_truth (str): the gt answer.
-    
+
 
     Returns:
         float : the exact match score
     """
-    
+
     return (normalize_answer(prediction) == normalize_answer(ground_truth))
 
 def special_token_filter(lan,clean = True,truncation = True,max_length = 1024):
@@ -111,7 +111,7 @@ def special_token_filter(lan,clean = True,truncation = True,max_length = 1024):
             truncation: to avoid crash pycocoevalcap the input sentence will be truncated to max_length
             max_length: You may set this to the max length of possible gt answer
         """
-     
+
         replacements = {
         "ASSISTANT:": "",
         "ASSISTANT: ": "",
@@ -134,7 +134,7 @@ def special_token_filter(lan,clean = True,truncation = True,max_length = 1024):
         if clean:
             lan = clean_answer(lan)
         return lan
-    
+
 def QA_prompt_define():
 
     """Define the system prompt and example instance
@@ -143,7 +143,7 @@ def QA_prompt_define():
         system_prompt : str, system prompt input into GPT
         ex_instance : str, example instance of the input and expected output in JSON format
     """
-    
+
     system_prompt = 'Evaluate a model-generated QA result against a human-generated answer for a 3D model.'+\
     ' I will give you a dict with "Question", "Model Answer" and "Human Answer".Please fully understand the'+\
     ' meaning of both s and  follow these three steps to evaluate the model-generated answer: First step, '+\
@@ -170,7 +170,7 @@ def QA_prompt_define():
     'wooden ","Texture of the pillow : soft fabric"], "Correct Number" : 2, "Wrong/Missing Number" : 1,'+\
     ' "Reasons" : "The model correctly identifies the material of pillow (cotton is soft fabric) but '+\
     'fails to recognize the material of the bowl." }. '
-    
+
     return system_prompt, ex_instance
 
 def QA_metric_map(eval_type):
@@ -196,12 +196,12 @@ if __name__ == '__main__':
         "2":["These <object 47> and <table 29> together form a functional combination for learning or working"]
     }
     refine_EM_result = []
-    
+
     for ins in all_pred:
         pred  = all_pred[ins][0]
         cnt = []
         for gt in all_gt[ins]:
-            cnt.append(exact_match_score(pred,gt)) 
-        
+            cnt.append(exact_match_score(pred,gt))
+
         refine_EM_result.append(max(cnt))
     print(refine_EM_result)

@@ -23,4 +23,3 @@ def process_scannet(scan_id,data_root,scannet_matrix):
     pts[:, :3] = pc
     pc = np.dot(pts, axis_align_matrix.transpose())[:, :3]
     return pc, pc_color, pc_color[:,0]
-

@@ -36,11 +36,11 @@ def coco_evaluate(batch_input):
     Returns:
         dict, dict: final_scores stores the score of each metric
     """
-    
+
     prediction = {}
     ground_truths = {}
-   
-    
+
+
     for _input in batch_input:
         prediction[_input['ID']] = _input['pred']
         ground_truths[_input['ID']] = _input['gt']
@@ -52,7 +52,7 @@ def coco_evaluate(batch_input):
         (Cider(), "CIDEr"),
         (Spice(), "SPICE"),
     ]
-    
+
     tokenizer = PTBTokenizer()
     ref_sent = ground_truths
     hypo_sent = prediction
@@ -61,7 +61,7 @@ def coco_evaluate(batch_input):
     ref_coco = tokenizer.tokenize(to_coco(ref_sent, ref_sent.keys()))
     hypo_coco = tokenizer.tokenize(to_coco(hypo_sent, ref_sent.keys()))
     for scorer, method in scorers:
-    
+
         score, scores = scorer.compute_score(ref_coco, hypo_coco)
         if type(score) == list:
             for m, s, s_ in zip(method, score, scores):
@@ -94,8 +94,8 @@ def EM_evaluation(batch_input):
         if pred in gts:
             EM_result.append(1)
         else:
-            EM_result.append(0) 
-    
+            EM_result.append(0)
+
     # refined EM
     refine_EM_result = []
     cnt = []
@@ -104,23 +104,23 @@ def EM_evaluation(batch_input):
         gts = _input["gt"]
         cnt = []
         for gt in gts:
-            cnt.append(exact_match_score(pred,gt)) 
+            cnt.append(exact_match_score(pred,gt))
         refine_EM_result.append(max(cnt))
     return EM_result, refine_EM_result
 
 
 class simcse_evaluator():
-    
+
     def __init__(self,model_path, eval_bs=500) -> None:
-        
+
         self.eval_bs = eval_bs
         self.simcse_tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.simcse_model = AutoModel.from_pretrained(model_path).to("cuda")
 
-    
+
     def __batch_evaluation__(self,all_pred,all_gt,gt_count):
         """Using Sentence Embeddings to calculate similarity between pred/gt in a batch.
-        
+
         Args:
             gt_count(list[int]): stores number of possible answers to a question
             all_pred(list[str]): all prediction
@@ -147,14 +147,14 @@ class simcse_evaluator():
             simcse_similarity = -100
             for j in range(accumulated,accumulated+gt_count[i]):
                 simcse_similarity = max(simcse_similarity ,1 - \
-                    cosine(all_pred_simcse_embed[i].cpu().detach().numpy(), 
-                        all_gt_simcse_embed[j].cpu().detach().numpy())) 
-                
+                    cosine(all_pred_simcse_embed[i].cpu().detach().numpy(),
+                        all_gt_simcse_embed[j].cpu().detach().numpy()))
+
             all_simcse_sim.append(simcse_similarity)
             accumulated+=gt_count[i]
         torch.cuda.empty_cache()
         return all_simcse_sim
-    
+
     def evaluation(self,batch_input):
         """Calculate the simcse similarity score for each item.
         Args:
@@ -167,34 +167,34 @@ class simcse_evaluator():
         Returns:
             list[float]: simcse similarity for each item
         """
-        all_simcse_similarity = []        
+        all_simcse_similarity = []
         batch_lan_pred = []
         batch_lan_gt = []
         count_gt = []
-        
+
         for idx, _item in enumerate(batch_input):
             batch_lan_pred.extend(_item['pred'])
             batch_lan_gt.extend(_item['gt'])
             count_gt.extend([len(_item['gt'])])
 
             if (idx+1) % self.eval_bs == 0 or idx == len(batch_input)-1:
-                
+
                 all_simcse_similarity += self.__batch_evaluation__(batch_lan_pred,batch_lan_gt,count_gt)
                 batch_lan_pred = []
                 batch_lan_gt = []
                 count_gt = []
-                
+
         return all_simcse_similarity
-    
+
 class sbert_evaluator():
     def __init__(self,model_path, eval_bs=500) -> None:
-        
+
         self.eval_bs = eval_bs
         self.sbert_model = SentenceTransformer(model_path,device="cuda")
-        
+
     def __batch_evaluation__(self,all_pred,all_gt,gt_count):
         """Using Sentence-BERT to calculate similarity between pred/gt in a batch.
-        
+
         Args:
             gt_count(list[int]): stores number of possible answers to a question
             all_pred(list[str]): all prediction
@@ -208,7 +208,7 @@ class sbert_evaluator():
         len_of_pred = len(all_pred)
         with torch.no_grad():
             sbert_embeddings = self.sbert_model.encode(all_pred+all_gt,show_progress_bar=False,device="cuda")
-            
+
         all_pred_sbert_embed = sbert_embeddings[:len_of_pred]
         all_gt_sbert_embed = sbert_embeddings[len_of_pred:]
         all_sbert_sim = []
@@ -223,7 +223,7 @@ class sbert_evaluator():
             accumulated+=gt_count[i]
         torch.cuda.empty_cache()
         return all_sbert_sim
-    
+
     def evaluation(self,batch_input):
         """Calculate the simcse similarity score for each item.
         Args:
@@ -236,21 +236,21 @@ class sbert_evaluator():
         Returns:
             list[float]: simcse similarity for each item
         """
-        all_sbert_similarity = []        
+        all_sbert_similarity = []
         batch_lan_pred = []
         batch_lan_gt = []
         count_gt = []
-        
+
         for idx, _item in enumerate(batch_input):
             batch_lan_pred.extend(_item['pred'])
             batch_lan_gt.extend(_item['gt'])
             count_gt.extend([len(_item['gt'])])
 
             if (idx+1) % self.eval_bs == 0 or idx == len(batch_input)-1:
-                
+
                 all_sbert_similarity += self.__batch_evaluation__(batch_lan_pred,batch_lan_gt,count_gt)
                 batch_lan_pred = []
                 batch_lan_gt = []
                 count_gt = []
-                
+
         return all_sbert_similarity

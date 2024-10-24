@@ -1,7 +1,7 @@
 <br>
 <p align="center">
 <h1 align="center"><strong>MMScan: A Multi-Modal 3D Scene Dataset with Hierarchical Grounded Language Annotations</strong></h1>
-  
+
   </p>
 </p>
 
@@ -36,7 +36,7 @@
 <div style="text-align: center;">
     <img src="assets/MMScan_teaser.png" alt="Dialogue_Teaser" width=100% >
 </div>
-     
+
 With the emergence of LLMs and their integration with other data modalities,
  multi-modal 3D perception attracts more attention due to its connectivity to the
  physical world and makes rapid progress. However, limited by existing datasets,
@@ -56,9 +56,9 @@ ing 3D scanning data, the resulting multi-modal 3D dataset encompasses 1.4M
  different aspects, and showcase the key problems to be addressed in the future.
  Furthermore, we use this high-quality dataset to train state-of-the-art 3D visual
  grounding and LLMs and obtain remarkable performance improvement both on
- existing benchmarks and in-the-wild evaluation. 
+ existing benchmarks and in-the-wild evaluation.
 
-## 🚀 Getting Started: 
+## 🚀 Getting Started:
 
 ### Installation
 
@@ -96,9 +96,9 @@ You can import MMScan API in this way:
     MMScan_{}_evaluator = importlib.import_module('MMScan_tool.evaluator.{}_evlation').{}_Evaluator
 ```
 
-#### MMScan DataLoader 
+#### MMScan DataLoader
 
-We offer a tool that allows you to easily obtain the data required by the models in the MMScan task. 
+We offer a tool that allows you to easily obtain the data required by the models in the MMScan task.
 ```bash
     my_loader = MMScan_dataloder(split='train')
     my_loader.set_lang_task("MMScan-QA",ratio=1.0)
@@ -114,19 +114,19 @@ You can conveniently use `__get_item__` to access them. Each item is a dictonary
 ```
         "ori_pcds" (tuple[tensor]): the raw data read from the pth file.
 
-        "pcds" (np.ndarray):  the point cloud data of the scan, 
+        "pcds" (np.ndarray):  the point cloud data of the scan,
                             [n_points, 6(xyz+rgb)]
 
-        "instance_labels" (np.ndarray): the instance id of each point, 
+        "instance_labels" (np.ndarray): the instance id of each point,
                                         [n_points,1]
 
-        "class_labels" (np.ndarray): the class id of each point, 
+        "class_labels" (np.ndarray): the class id of each point,
                                         [n_points,1]
 
-        "bboxes" (dict):  bounding boxes info in the scan 
-                        { object_id : 
-                            {"type": object_type (str),  
-                            "bbox": 9 DoF box (np.ndarray), 
+        "bboxes" (dict):  bounding boxes info in the scan
+                        { object_id :
+                            {"type": object_type (str),
+                            "bbox": 9 DoF box (np.ndarray),
                         ...}}
 ```
 ( 2 ) Lanuage modality
@@ -142,9 +142,9 @@ You can conveniently use `__get_item__` to access them. Each item is a dictonary
         "anchors" (list[str]) : The anchor objects type.
         "anchor_ids" (list[int]) : The anchor objects id.
         "tokens_positive" (dict) : Where the object mentioned in the text
-    
 
-        for QA task 
+
+        for QA task
         "question" (str): the quseion.
         "answers" (list[str]): the answers.
         "object_ids" (list[int]): objects id mentioned in the questions.(gt)
@@ -160,7 +160,7 @@ You can conveniently use `__get_item__` to access them. Each item is a dictonary
 
 
 #### MMScan  Evaluator
-We offer a tool that allows you to easily evaluate the model output in the MMScan task. 
+We offer a tool that allows you to easily evaluate the model output in the MMScan task.
 
 (1) Visual grounding evaluator
 
@@ -187,7 +187,7 @@ the input to the evaluator should be in a certain format:
         "pred_bboxes"/"gt_bboxes" (tensor/ndarray): the list of 9 DoF box.
                   Support for two input mode:
                     1. 9-dim 9 DoF bounding box (num_pred/gt, 9)
-                    2. center, size and rot matrix 
+                    2. center, size and rot matrix
                     ("center": (num_pred/gt, 3),
                       "size" : (num_pred/gt, 3),
                        "rot" : (num_pred/gt, 3, 3))
@@ -205,7 +205,7 @@ for question answering task, our evaluator calculate the metric Bleu-X, Metor, C
     metric_dict = my_evaluator.start_evaluation()
     # Optional 1, get the sample-level result
     print(my_evaluator.records)
- 
+
     # You should reset the evaluator!
     my_evaluator.reset()
 ```
@@ -215,7 +215,7 @@ the input to the evaluator should be in a certain format:
         "pred" (list[str]): the prediction, length should be equal 1.
         "gt" (list[str]): the prediction, length should be larger than 1.
         "ID": the ID in the QA samples, should be unique.
-        "index" 
+        "index"
 ```
 
 (3) GPT evaluator

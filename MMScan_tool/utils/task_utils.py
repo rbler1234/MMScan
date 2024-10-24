@@ -1,6 +1,6 @@
 
 def anno_token_flatten(samples,keep_only_one=True):
-    """Flatten the annotation tokens for each target in a 3d visual grounding 
+    """Flatten the annotation tokens for each target in a 3d visual grounding
     sample.
 
     Args:
@@ -9,8 +9,8 @@ def anno_token_flatten(samples,keep_only_one=True):
     Returns:
         List of Dict : The token-flattened samples.
     """
-    
-    
+
+
     marked_indices = []
     for i, d in enumerate(samples):
         target_ids = d["target_id"]
@@ -23,7 +23,7 @@ def anno_token_flatten(samples,keep_only_one=True):
                 ret_target_ids.append(target_id)
                 ret_target.append(d["target"][i])
                 ret_tps.append(tp)
-                if keep_only_one: 
+                if keep_only_one:
                     break
         d["target_id"] = ret_target_ids
         d["target"] = ret_target
@@ -35,4 +35,3 @@ def anno_token_flatten(samples,keep_only_one=True):
         del samples[i]
 
     return samples
-
