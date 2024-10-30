@@ -1,0 +1,997 @@
+call with args: Namespace(base_lr=1e-06, batchsize_per_gpu=8, captioner='ll3da', checkpoint_dir='./ckpts/opt-1.3b/tunning_mmscan', clip_gradient=0.1, criterion='refined_EM', dataset='unified_embodied_scan_qa', dataset_num_workers=4, detector='detector_Vote2Cap_DETR', dist_url='tcp://localhost:12345', eval_every_iteration=3000000, filter_name='captioner.transformer.', final_lr=1e-06, freeze_detector=True, freeze_llm=True, grid_size_3d=255, log_every=10, lr_scheduler='cosine', max_des_len=224, max_epoch=4, max_gen_len=32, max_prompts=1, ngpus=1, no_height=False, optimizer='AdamW', pretrained_params_lr=None, pretrained_weights='/mnt/petrelfs/linjingli/mmscan_modelzoo-main/llmzoo/LL3DA/pretrained/ll-gernalist/ll3da-opt-1.3b.pth', qformer_vocab='bert-base-embedding', save_every=10000, seed=0, start_epoch=0, start_eval_after=-1, test_ckpt='', test_min_iou=0.5, test_only=False, use_beam_search=True, use_color=True, use_height=True, use_multiview=False, use_normal=True, vocab='facebook/opt-1.3b', warm_lr=1e-06, warm_lr_epochs=0, weight_decay=0.1)
+CaptionNet(
+  (detector): Model_Vote2Cap_DETR(
+    (tokenizer): PointnetSAModuleVotes(
+      (grouper): QueryAndGroup()
+      (mlp_module): SharedMLP(
+        (layer0): Conv2d(
+          (conv): Conv2d(10, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn): BatchNorm2d(
+            (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (activation): ReLU(inplace=True)
+        )
+        (layer1): Conv2d(
+          (conv): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn): BatchNorm2d(
+            (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (activation): ReLU(inplace=True)
+        )
+        (layer2): Conv2d(
+          (conv): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn): BatchNorm2d(
+            (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (activation): ReLU(inplace=True)
+        )
+      )
+    )
+    (encoder): MaskedTransformerEncoder(
+      masking_radius=0.16, 0.64, 1.44
+      (layers): ModuleList(
+        (0): TransformerEncoderLayer(
+          attn_dr=0.1
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (linear1): Linear(in_features=256, out_features=128, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=128, out_features=256, bias=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (activation): ReLU()
+        )
+        (1): TransformerEncoderLayer(
+          attn_dr=0.1
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (linear1): Linear(in_features=256, out_features=128, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=128, out_features=256, bias=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (activation): ReLU()
+        )
+        (2): TransformerEncoderLayer(
+          attn_dr=0.1
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (linear1): Linear(in_features=256, out_features=128, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=128, out_features=256, bias=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (activation): ReLU()
+        )
+      )
+      (interim_downsampling): PointnetSAModuleVotes(
+        (grouper): QueryAndGroup()
+        (mlp_module): SharedMLP(
+          (layer0): Conv2d(
+            (conv): Conv2d(259, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (bn): BatchNorm2d(
+              (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (activation): ReLU(inplace=True)
+          )
+          (layer1): Conv2d(
+            (conv): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (bn): BatchNorm2d(
+              (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (activation): ReLU(inplace=True)
+          )
+          (layer2): Conv2d(
+            (conv): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (bn): BatchNorm2d(
+              (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (activation): ReLU(inplace=True)
+          )
+        )
+      )
+    )
+    (encoder_to_decoder_projection): GenericMLP(
+      (layers): Sequential(
+        (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+        (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+        (3): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+        (4): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (5): ReLU()
+      )
+    )
+    (pos_embedding): PositionEmbeddingCoordsSine(type=fourier, scale=6.283185307179586, normalize=True, gaussB=torch.Size([3, 128]), gaussBsum=15.589823722839355)
+    (vote_query_generator): VoteQuery(
+      (FFN_vote): Sequential(
+        (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+        (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+        (3): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+        (4): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (5): ReLU()
+        (6): Conv1d(256, 259, kernel_size=(1,), stride=(1,))
+      )
+      (set_abstraction): PointnetSAModuleVotes(
+        (grouper): QueryAndGroup()
+        (mlp_module): SharedMLP(
+          (layer0): Conv2d(
+            (conv): Conv2d(259, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (bn): BatchNorm2d(
+              (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (activation): ReLU(inplace=True)
+          )
+          (layer1): Conv2d(
+            (conv): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (bn): BatchNorm2d(
+              (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (activation): ReLU(inplace=True)
+          )
+          (layer2): Conv2d(
+            (conv): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (bn): BatchNorm2d(
+              (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (activation): ReLU(inplace=True)
+          )
+        )
+      )
+    )
+    (query_projection): GenericMLP(
+      (layers): Sequential(
+        (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+        (1): ReLU()
+        (2): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+        (3): ReLU()
+      )
+    )
+    (decoder): TransformerDecoder(
+      (layers): ModuleList(
+        (0): TransformerDecoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (multihead_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (dropout3): Dropout(p=0.1, inplace=False)
+          (linear1): Linear(in_features=256, out_features=256, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=256, out_features=256, bias=True)
+          (activation): ReLU()
+        )
+        (1): TransformerDecoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (multihead_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (dropout3): Dropout(p=0.1, inplace=False)
+          (linear1): Linear(in_features=256, out_features=256, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=256, out_features=256, bias=True)
+          (activation): ReLU()
+        )
+        (2): TransformerDecoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (multihead_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (dropout3): Dropout(p=0.1, inplace=False)
+          (linear1): Linear(in_features=256, out_features=256, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=256, out_features=256, bias=True)
+          (activation): ReLU()
+        )
+        (3): TransformerDecoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (multihead_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (dropout3): Dropout(p=0.1, inplace=False)
+          (linear1): Linear(in_features=256, out_features=256, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=256, out_features=256, bias=True)
+          (activation): ReLU()
+        )
+        (4): TransformerDecoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (multihead_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (dropout3): Dropout(p=0.1, inplace=False)
+          (linear1): Linear(in_features=256, out_features=256, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=256, out_features=256, bias=True)
+          (activation): ReLU()
+        )
+        (5): TransformerDecoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (multihead_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (dropout3): Dropout(p=0.1, inplace=False)
+          (linear1): Linear(in_features=256, out_features=256, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=256, out_features=256, bias=True)
+          (activation): ReLU()
+        )
+        (6): TransformerDecoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (multihead_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (dropout3): Dropout(p=0.1, inplace=False)
+          (linear1): Linear(in_features=256, out_features=256, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=256, out_features=256, bias=True)
+          (activation): ReLU()
+        )
+        (7): TransformerDecoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (multihead_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=256, out_features=256, bias=True)
+          )
+          (norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+          (dropout3): Dropout(p=0.1, inplace=False)
+          (linear1): Linear(in_features=256, out_features=256, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=256, out_features=256, bias=True)
+          (activation): ReLU()
+        )
+      )
+      (norm): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+    )
+    (mlp_heads): ModuleDict(
+      (sem_cls_head): GenericMLP(
+        (layers): Sequential(
+          (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU()
+          (3): Dropout(p=0.3, inplace=False)
+          (4): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (5): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (6): ReLU()
+          (7): Dropout(p=0.3, inplace=False)
+          (8): Conv1d(256, 19, kernel_size=(1,), stride=(1,))
+        )
+      )
+      (center_head): GenericMLP(
+        (layers): Sequential(
+          (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU()
+          (3): Dropout(p=0.3, inplace=False)
+          (4): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (5): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (6): ReLU()
+          (7): Dropout(p=0.3, inplace=False)
+          (8): Conv1d(256, 3, kernel_size=(1,), stride=(1,))
+        )
+      )
+      (size_head): GenericMLP(
+        (layers): Sequential(
+          (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU()
+          (3): Dropout(p=0.3, inplace=False)
+          (4): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (5): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (6): ReLU()
+          (7): Dropout(p=0.3, inplace=False)
+          (8): Conv1d(256, 3, kernel_size=(1,), stride=(1,))
+        )
+      )
+      (angle_cls_head): GenericMLP(
+        (layers): Sequential(
+          (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU()
+          (3): Dropout(p=0.3, inplace=False)
+          (4): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (5): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (6): ReLU()
+          (7): Dropout(p=0.3, inplace=False)
+          (8): Conv1d(256, 1, kernel_size=(1,), stride=(1,))
+        )
+      )
+      (angle_residual_head): GenericMLP(
+        (layers): Sequential(
+          (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU()
+          (3): Dropout(p=0.3, inplace=False)
+          (4): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+          (5): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (6): ReLU()
+          (7): Dropout(p=0.3, inplace=False)
+          (8): Conv1d(256, 1, kernel_size=(1,), stride=(1,))
+        )
+      )
+    )
+    (criterion): OverallCriterion(
+      (set_prediction_loss): SetPredictionCriterion(
+        (matcher): Matcher()
+      )
+      (vote_query_loss): VoteQueryCriterion()
+    )
+  )
+  (captioner): captioner(
+    (transformer): OPTForCausalLM(
+      (model): OPTModel(
+        (decoder): OPTDecoder(
+          (embed_tokens): Embedding(50272, 2048, padding_idx=1)
+          (embed_positions): OPTLearnedPositionalEmbedding(2050, 2048)
+          (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+          (layers): ModuleList(
+            (0): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (1): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (2): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (3): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (4): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (5): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (6): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (7): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (8): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (9): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (10): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (11): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (12): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (13): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (14): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (15): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (16): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (17): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (18): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (19): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (20): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (21): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (22): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+            (23): OPTDecoderLayer(
+              (self_attn): OPTAttention(
+                (k_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (v_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (q_proj): Linear(in_features=2048, out_features=2048, bias=True)
+                (out_proj): Linear(in_features=2048, out_features=2048, bias=True)
+              )
+              (activation_fn): ReLU()
+              (self_attn_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+              (fc1): Linear(in_features=2048, out_features=8192, bias=True)
+              (fc2): Linear(in_features=8192, out_features=2048, bias=True)
+              (final_layer_norm): LayerNorm((2048,), eps=1e-05, elementwise_affine=True)
+            )
+          )
+        )
+      )
+      (lm_head): Linear(in_features=2048, out_features=50272, bias=False)
+    )
+    (qformer): InstructBlipQFormerModel(
+      (embeddings): InstructBlipQFormerEmbeddings(
+        (word_embeddings): Embedding(30522, 768, padding_idx=0)
+        (position_embeddings): Embedding(512, 768)
+        (layernorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+        (dropout): Dropout(p=0.1, inplace=False)
+      )
+      (encoder): InstructBlipQFormerEncoder(
+        (layer): ModuleList(
+          (0): InstructBlipQFormerLayer(
+            (attention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=768, out_features=768, bias=True)
+                (value): Linear(in_features=768, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (crossattention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=256, out_features=768, bias=True)
+                (value): Linear(in_features=256, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (intermediate_query): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output_query): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (1): InstructBlipQFormerLayer(
+            (attention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=768, out_features=768, bias=True)
+                (value): Linear(in_features=768, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (intermediate_query): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output_query): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (2): InstructBlipQFormerLayer(
+            (attention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=768, out_features=768, bias=True)
+                (value): Linear(in_features=768, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (crossattention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=256, out_features=768, bias=True)
+                (value): Linear(in_features=256, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (intermediate_query): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output_query): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (3): InstructBlipQFormerLayer(
+            (attention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=768, out_features=768, bias=True)
+                (value): Linear(in_features=768, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (intermediate_query): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output_query): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (4): InstructBlipQFormerLayer(
+            (attention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=768, out_features=768, bias=True)
+                (value): Linear(in_features=768, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (crossattention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=256, out_features=768, bias=True)
+                (value): Linear(in_features=256, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (intermediate_query): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output_query): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (5): InstructBlipQFormerLayer(
+            (attention): InstructBlipQFormerAttention(
+              (attention): InstructBlipQFormerMultiHeadAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=768, out_features=768, bias=True)
+                (value): Linear(in_features=768, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): InstructBlipQFormerSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (intermediate_query): InstructBlipQFormerIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output_query): InstructBlipQFormerOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+        )
+      )
+    )
+    (encoder_to_qformer_projection): Sequential(
+      (0): Linear(in_features=256, out_features=256, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=256, out_features=256, bias=True)
+      (3): ReLU()
+    )
+    (prompt_encoder): PromptEncoder(
+      (box_prompt_projector): Sequential(
+        (0): Linear(in_features=256, out_features=768, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=768, out_features=6144, bias=True)
+      )
+      (click_prompt_projector): Sequential(
+        (0): Linear(in_features=256, out_features=768, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=768, out_features=6144, bias=True)
+      )
+      (pos_emb3d): PositionEmbeddingCoordsSine(type=fourier, scale=6.283185307179586, normalize=True, gaussB=torch.Size([3, 128]), gaussBsum=-8.539981842041016)
+    )
+    (latent_query): Embedding(32, 768)
+    (qformer_to_language_projection): Linear(in_features=768, out_features=2048, bias=True)
+  )
+)
+Epoch [0/4]; Iter [0/638304]; Loss 3.72; LR 1.00e-06; Iter time 8.91; ETA 65 days, 18:57:51; Mem 10076.42MB
+Epoch [0/4]; Iter [10/638304]; Loss 3.68; LR 1.00e-06; Iter time 0.44; ETA 3 days, 6:01:18; Mem 11371.30MB
+Epoch [0/4]; Iter [20/638304]; Loss 3.66; LR 1.00e-06; Iter time 0.43; ETA 3 days, 4:35:18; Mem 11371.30MB
+Epoch [0/4]; Iter [30/638304]; Loss 3.47; LR 1.00e-06; Iter time 0.44; ETA 3 days, 5:53:20; Mem 11371.30MB
+Epoch [0/4]; Iter [40/638304]; Loss 3.23; LR 1.00e-06; Iter time 0.43; ETA 3 days, 4:40:52; Mem 11371.30MB
+Epoch [0/4]; Iter [50/638304]; Loss 3.12; LR 1.00e-06; Iter time 0.49; ETA 3 days, 14:42:31; Mem 11371.30MB
+Epoch [0/4]; Iter [60/638304]; Loss 3.03; LR 1.00e-06; Iter time 0.43; ETA 3 days, 4:37:57; Mem 11371.30MB
+Epoch [0/4]; Iter [70/638304]; Loss 2.66; LR 1.00e-06; Iter time 0.43; ETA 3 days, 4:21:44; Mem 11371.30MB
+Epoch [0/4]; Iter [80/638304]; Loss 2.69; LR 1.00e-06; Iter time 0.44; ETA 3 days, 5:21:05; Mem 11371.30MB
+Epoch [0/4]; Iter [90/638304]; Loss 2.54; LR 1.00e-06; Iter time 0.69; ETA 5 days, 1:40:27; Mem 11371.30MB
+Epoch [0/4]; Iter [100/638304]; Loss 2.46; LR 1.00e-06; Iter time 0.43; ETA 3 days, 4:36:45; Mem 11371.30MB
+Epoch [0/4]; Iter [110/638304]; Loss 2.59; LR 1.00e-06; Iter time 0.44; ETA 3 days, 5:47:49; Mem 11371.30MB
+Epoch [0/4]; Iter [120/638304]; Loss 2.25; LR 1.00e-06; Iter time 0.43; ETA 3 days, 4:51:04; Mem 11371.30MB
+Epoch [0/4]; Iter [130/638304]; Loss 2.23; LR 1.00e-06; Iter time 0.75; ETA 5 days, 12:10:37; Mem 11371.30MB
+Epoch [0/4]; Iter [140/638304]; Loss 2.11; LR 1.00e-06; Iter time 0.44; ETA 3 days, 5:49:25; Mem 11371.30MB
+Epoch [0/4]; Iter [150/638304]; Loss 2.10; LR 1.00e-06; Iter time 0.43; ETA 3 days, 4:52:13; Mem 11371.30MB
+Epoch [0/4]; Iter [160/638304]; Loss 2.08; LR 1.00e-06; Iter time 0.44; ETA 3 days, 5:18:34; Mem 11371.30MB
+Epoch [0/4]; Iter [170/638304]; Loss 2.11; LR 1.00e-06; Iter time 0.50; ETA 3 days, 16:21:27; Mem 11371.30MB
+Epoch [0/4]; Iter [180/638304]; Loss 1.85; LR 1.00e-06; Iter time 0.44; ETA 3 days, 5:56:54; Mem 11371.30MB

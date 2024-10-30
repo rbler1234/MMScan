@@ -1,0 +1,5 @@
+pycocoevalcap        
+transformers   
+sentence-transformers    
+simcse           
+openai

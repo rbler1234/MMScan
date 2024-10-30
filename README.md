@@ -69,6 +69,17 @@ ing 3D scanning data, the resulting multi-modal 3D dataset encompasses 1.4M
     cd MMScan
     ```
 
+2. Install requirements. 
+
+    Your environment needs to include Python version 3.8 or higher.
+
+    ```shell
+    conda activate your_env_name
+    python intall.py --all 
+    ```
+
+    You can "--VG/QA" if you only need either one of the two.
+
 ### Data Preparation
 
 1. Download the Embodiedscan and MMScan annotation. (Fill in the [form](https://docs.google.com/forms/d/e/1FAIpQLScUXEDTksGiqHZp31j7Zp7zlCNV7p_08uViwP_Nbzfn3g6hhw/viewform) to apply for downloading)
@@ -87,23 +98,22 @@ ing 3D scanning data, the resulting multi-modal 3D dataset encompasses 1.4M
 
 You can import MMScan API in this way:
 ```bash
-    sys.path.append('path/to/MMScan')
+    import mmscan_tool
 
-    (1) the dataloader tool
-    MMScan_dataloder = importlib.import_module('MMScan_tool.mmscan').EmbodiedScan
+    (1) the dataset tool
+    import mmscan_tool.MMScan as MMScan_dataset
 
-    (2) the evaluator tool
-    MMScan_{}_evaluator = importlib.import_module('MMScan_tool.evaluator.{}_evlation').{}_Evaluator
+    (2) the evaluator tool ('VG'/'QA'/'GPT')
+    import mmscan_tool.{}_Evaluator as MMScan_{}_evaluator
 ```
 
-#### MMScan DataLoader
+#### MMScan Dataset
 
 We offer a tool that allows you to easily obtain the data required by the models in the MMScan task.
 ```bash
-    my_loader = MMScan_dataloder(split='train')
-    my_loader.set_lang_task("MMScan-QA",ratio=1.0)
+    my_dataset = MMScan_dataloder(split='train',task="MMScan-QA",ratio=1.0)
     # the train split of MMScan QA task, the down sample ratio is 1.0
-    print(my_loader[100])
+    print(my_dataset[100])
 ```
 
 You can conveniently use `__get_item__` to access them. Each item is a dictonary containing the following keys:
@@ -156,7 +166,24 @@ You can conveniently use `__get_item__` to access them. Each item is a dictonary
 
 ( 3 ) 2D modality
 
-    TBD
+The value corresponding to the key "images" is a list containing specific camera information, which includes the RGB image path, depth image path, camera intrinsic and extrinsic parameters, and the IDs of objects visible to the camera.
+
+```
+    "images"(list[dict]):
+    [
+        {
+          'img_path'(str): path to its rgb image
+          'depth_img_path'(str): path to its depth image
+          'intrinsic'(np.ndarray): camera intrinsic of the rgb image
+          'depth_intrinsic'(np.ndarray): camera intrinsic of the depth image
+          'extrinsic'(np.ndarray): camera extrinsic
+          'visible_instance_id'(list): Ds of objects visible
+        }
+        ...
+    ] 
+
+```
+
 
 
 #### MMScan  Evaluator
@@ -173,7 +200,7 @@ for visual grounding task, our evaluator calculate the metric AP, AR, multi-topk
     metric_dict = my_evaluator.start_evaluation()
     # Optional 1, get the sample-level result
     print(my_evaluator.records)
-    # Optional 1, get the sample-level result
+    # Optional 2, get the sample-level result
     print(my_evaluator.print_result())
 
     # You should reset the evaluator!
@@ -198,7 +225,7 @@ the input to the evaluator should be in a certain format:
 
 for question answering task, our evaluator calculate the metric Bleu-X, Metor, CiDer, Spice, Simcse, Sbert, EM, Refine EM
 ```bash
-    # whether to show the progress
+    # model_config stores the pretrain weights of SIMCSE and SBERT
     my_evaluator = MMScan_QA_evaluator(model_config={},verbose=True)
     # the input to the evaluator should be in a certain format.
     my_evaluator.update(model_output)
@@ -207,6 +234,29 @@ for question answering task, our evaluator calculate the metric Bleu-X, Metor, C
     print(my_evaluator.records)
 
     # You should reset the evaluator!
+    my_evaluator.reset()
+```
+
+the input to the evaluator should be in a certain format:
+```
+        "qusetion"(str)
+        "pred" (list[str]): the prediction, length should be equal 1.
+        "gt" (list[str]): the prediction, length should be larger than 1.
+        "ID": the ID in the QA samples, should be unique.
+        "index"
+```
+
+(3) GPT evaluator
+
+for question answering task, we alse provide GPT evaluator, which we 
+think it's more reasonable to use.
+```bash
+    # whether to show the progress
+    my_evaluator = MMScan_GPT_Evaluator(API_key='XXX')
+    # the input to the evaluator should be in a certain format.
+    # tmp_path to store the result from multi-process
+    metric_dict = my_evaluator.load_and_eval(model_output, num_threads=5, tmp_path ='XXX')
+   
     my_evaluator.reset()
 ```
 the input to the evaluator should be in a certain format:
@@ -218,7 +268,6 @@ the input to the evaluator should be in a certain format:
         "index"
 ```
 
-(3) GPT evaluator
 ### Models
 
 

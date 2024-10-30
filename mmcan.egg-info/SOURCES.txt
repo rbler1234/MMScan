@@ -1,0 +1,8 @@
+README.md
+setup.py
+mmcan.egg-info/PKG-INFO
+mmcan.egg-info/SOURCES.txt
+mmcan.egg-info/dependency_links.txt
+mmcan.egg-info/top_level.txt
+mmscan_tool/__init__.py
+mmscan_tool/mmscan.py
