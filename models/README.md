@@ -1,4 +1,4 @@
-## Visual Grounding models
+## Visual Grounding Models
 
 ### Scanrefer
 
@@ -16,9 +16,9 @@
     ```bash
     python -u scripts/train.py --use_color --eval_only --use_checkpoint "path/to/pth"
     ```
-### Embodiedscan
+### EmbodiedScan
 TBD
-## Question Answering models
+## Question Answering Models
 
 ### LL3DA
 

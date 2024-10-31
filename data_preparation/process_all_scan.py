@@ -132,13 +132,13 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--meta_path', type=str, default='./meta-data')
     parser.add_argument('--data_root', type=str,
-                        default='../MMScan_data/embodiedscan-split/embodiedscan-v1/data')
+                        default='../mmscan_data/embodiedscan-split/embodiedscan-v1/data')
     parser.add_argument('--save_root', type=str,
-                        default='../MMScan_data/embodiedscan-split/embodiedscan-v1/process_pcd')
+                        default='../mmscan_data/embodiedscan-split/embodiedscan-v1/process_pcd')
     parser.add_argument('--train_pkl_path', type=str,
-    default='../MMScan_data/embodiedscan-split/embodiedscan-v1/embodiedscan_infos_train.pkl')
+    default='../mmscan_data/embodiedscan-split/embodiedscan-v1/embodiedscan_infos_train.pkl')
     parser.add_argument('--val_pkl_path', type=str,
-    default='../MMScan_data/embodiedscan-split/embodiedscan-v1/embodiedscan_infos_val.pkl')
+    default='../mmscan_data/embodiedscan-split/embodiedscan-v1/embodiedscan_infos_val.pkl')
     parser.add_argument('--nproc', type=int, default=8)
     args = parser.parse_args()
 
@@ -161,8 +161,7 @@ if __name__ == '__main__':
     # loading the required scan id
     with open(f'{args.meta_path}/all_scan.json','r') as f:
         scan_id_list = json.load(f)
-    scan_id_list = ['scene0000_00','1mp3d_0046_region7',
-                    'd7d40d6c-7a5d-2b36-9674-c435fa58a2d1']
+   
     #(1) loading the axis matrix info
     mp3d_matrix = np.load(f'{args.meta_path}/mp3d_matrix.npy',\
         allow_pickle=True).item()

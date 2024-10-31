@@ -3,7 +3,7 @@ from pathlib import Path
 
 from mmscan_tool import QA_Evaluator
 
-model_config = {"simcse":"/mnt/petrelfs/linjingli/mmscan_modelzoo-main/evaluation/pc","sbert":"/mnt/petrelfs/linjingli/mmscan_modelzoo-main/evaluation/st"}
+model_config = {"simcse":"","sbert":""}
 
 from evaluator.build import EVALUATOR_REGISTRY
 

@@ -11,8 +11,8 @@ Detailed steps are shown as follows.
 
 
 
-4. Organize the file structure. Under `MMScan_data/embodiedscan-split/embodiedscan-v1`, the directory structure should be as below,
-You are recommanded to create a soft link to the raw data folder under `MMScan_data/embodiedscan-split/embodiedscan-v1`.
+4. Organize the file structure. Under `mmscan_data/embodiedscan-split/embodiedscan-v1`, the directory structure should be as below,
+You are recommanded to create a soft link to the raw data folder under `mmsan_data/embodiedscan-split/embodiedscan-v1`.
 
     Additionally, create a `process_pcd` folder in the same directory to store the results. Similarly, we recommend using a symbolic link, as the total file size might be a little large (approximately 21GB)
 

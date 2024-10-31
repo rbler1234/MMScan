@@ -1,5 +1,5 @@
 torch
 numpy
-
-
+plyfile
+pytorch3d
 

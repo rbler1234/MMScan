@@ -1,4 +1,3 @@
-import json
 from plyfile import PlyData
 import numpy as np
 
