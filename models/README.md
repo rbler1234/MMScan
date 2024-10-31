@@ -10,7 +10,7 @@
 
 4. Run the following command to train Scanrefer (one GPU):
     ```bash
-    python -u scripts/train.py --use_color --epoch {20/50/100}
+    python -u scripts/train.py --use_color --epoch {10/25/50}
     ```
 5. Run the following command to evaluate Scanrefer (one GPU):
     ```bash
@@ -25,6 +25,7 @@ TBD
 1. Follow the [LL3DA](https://github.com/Open3DA/LL3DA/blob/main/README.md) to setup the Env. For data preparation, you need not load the datasets, only need to:
 
     (1) download the [release pre-trained weights.](https://huggingface.co/CH3COOK/LL3DA-weight-release/blob/main/ll3da-opt-1.3b.pth) and put them under `./pretrained`
+
     (2) Download the [pre-processed BERT embedding weights](https://huggingface.co/CH3COOK/bert-base-embedding/tree/main) and store them under the `./bert-base-embedding` folder
 
 2. Install MMScan API.
@@ -48,4 +49,29 @@ TBD
 
 ### LEO
 
-TBD
+1. Follow the [LEO](https://github.com/embodied-generalist/embodied-generalist/blob/main/README.md) to setup the Env. For data preparation, you need not load the datasets, only need to:
+
+    (1) Download [Vicuna-7B](https://huggingface.co/huangjy-pku/vicuna-7b/tree/main) and update cfg_path in configs/llm/*.yaml
+
+    (2) Download the [sft_noact.pth](https://huggingface.co/datasets/huangjy-pku/LEO_data/tree/main) and store it under the `./weights` folder
+
+2. Install MMScan API.
+
+3. Edit the config under `scripts/train_tuning_mmscan.sh` and `scripts/test_tuning_mmscan.sh`
+
+4. Run the following command to train LEO (4 GPU):
+    ```bash
+    bash scripts/train_tuning_mmscan.sh  
+    ```
+5. Run the following command to evaluate LEO (4 GPU):
+    ```bash
+    bash scripts/test_tuning_mmscan.sh
+    ```
+    Optinal: You can use the GPT evaluator by this after getting the result.
+     'test_embodied_scan_l_complete.json' will be generated under the checkpoint folder after evaluation and the tmp_path is used for temporarily storing.
+    ```bash
+    python evaluator/GPT_eval.py --file path/to/test_embodied_scan_l_complete.json
+    --tmp_path path/to/tmp  --api_key your_api_key --eval_size -1
+    --nproc 4
+
+PS : It is possible that LEO may encounter an "NaN" error in the MultiHeadAttentionSpatial module due to the training setup when training more epoches. ( no problem for 4GPU one epoch)

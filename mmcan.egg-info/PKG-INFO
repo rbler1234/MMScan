@@ -88,8 +88,11 @@ ing 3D scanning data, the resulting multi-modal 3D dataset encompasses 1.4M
 
     ```shell
     conda activate your_env_name
-    python setup.py develop
+    python intall.py --all 
     ```
+
+    You can "--VG/QA" if you only need either one of the two.
+
 ### Data Preparation
 
 1. Download the Embodiedscan and MMScan annotation. (Fill in the [form](https://docs.google.com/forms/d/e/1FAIpQLScUXEDTksGiqHZp31j7Zp7zlCNV7p_08uViwP_Nbzfn3g6hhw/viewform) to apply for downloading)

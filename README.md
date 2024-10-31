@@ -9,7 +9,7 @@
 <div id="top" align="center">
 
 [![arXiv](https://img.shields.io/badge/arXiv-2312.16170-blue)](https://arxiv.org/abs/2312.16170)
-[![](https://img.shields.io/badge/Paper-%F0%9F%93%96-blue)](./assets/MMScan.pdf)
+[![](https://img.shields.io/badge/Paper-%F0%9F%93%96-blue)](./assets/2024_NeurIPS_MMScan_Camera_Ready.pdf)
 [![](https://img.shields.io/badge/Project-%F0%9F%9A%80-blue)](https://tai-wang.github.io/mmscan)
 
 </div>
@@ -269,6 +269,8 @@ the input to the evaluator should be in a certain format:
 ```
 
 ### Models
+
+We have adapted the MMScan API for some [models](./models/README.md)
 
 
 ## 📝 TODO List

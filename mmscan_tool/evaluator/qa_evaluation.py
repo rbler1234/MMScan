@@ -39,11 +39,6 @@ class QA_Evaluator():
         self.verbose = verbose
         self. max_length = max_length
         self.special_metric = []
-        if len(model_config)==0:
-            model_config = {
-                            "simcse":"princeton-nlp/sup-simcse-roberta-large",
-                            "sbert":'all-mpnet-base-v2'
-                            }
         if "simcse" in model_config and torch.cuda.is_available():
             self.special_metric.append("simcse")
             self.simcse_evaluator = simcse_evaluator(\

@@ -43,9 +43,10 @@ def evaluate(
     curr_train_iter=-1,
 ):
     
-    # prepare ground truth caption labels
-    print("preparing corpus...")
-    model_config = {}
+    """
+        define the mmscan_eval here
+    """
+    model_config = {"simcse":'',"sbert":''}
 
     evaluator = QA_Evaluator(model_config)
     
@@ -71,7 +72,7 @@ def evaluate(
     
     epoch_str = f"[{curr_epoch}/{args.max_epoch}]" if curr_epoch > 0 else ""
     
-    print(len(dataset_loader))
+    
     
     for curr_iter, batch_data_label in enumerate(dataset_loader):
         

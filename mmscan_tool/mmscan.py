@@ -89,7 +89,7 @@ class MMScan(Dataset):
         # TODO: change this
         #'{}/../data_preparation/meta-data/mp3d_mapping.json'.format(self.dataroot)
         self.id_mapping = id_mapping(self.mapping_json_path)
-        self.table_names = ["point_clouds","bboxes","object_ids","object_types","object_type_ints",
+        self.table_names = ["es_file","pc_file","point_clouds","bboxes","object_ids","object_types","object_type_ints",
                             "visible_view_object_dict","extrinsics_c2w","axis_align_matrix","intrinsics",
                             "depth_intrinsics","image_paths","depth_image_paths","visible_instance_ids"]
         self.lang_tasks = \
@@ -257,10 +257,16 @@ class MMScan(Dataset):
         """
         assert table_name in self.table_names, \
             "Table {} not found".format(table_name)
-
-        return torch.load(\
-            f'{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth') if\
-            table_name == "point_clouds" else self.embodiedscan_anno[scan_idx][table_name]
+        
+        if table_name == "point_clouds":
+            return torch.load(\
+            f'{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth')
+        elif table_name == "es_file":
+            return deepcopy(self.pkl_name)
+        elif table_name == "pc_file":
+            return f'{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth'
+        else:
+            return self.embodiedscan_anno[scan_idx][table_name]
 
 
     def data_collect(self)->dict:

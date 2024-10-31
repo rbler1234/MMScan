@@ -124,6 +124,8 @@ class simcse_evaluator():
     def __init__(self,model_path, eval_bs=500) -> None:
 
         self.eval_bs = eval_bs
+        if len(model_path)==0:
+            model_path = "princeton-nlp/sup-simcse-roberta-large"
         self.simcse_tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.simcse_model = AutoModel.from_pretrained(model_path).to("cuda")
 
@@ -200,6 +202,8 @@ class sbert_evaluator():
     def __init__(self,model_path, eval_bs=500) -> None:
 
         self.eval_bs = eval_bs
+        if len(model_path)==0:
+            model_path = 'all-mpnet-base-v2'
         self.sbert_model = SentenceTransformer(model_path,device="cuda")
 
     def __batch_evaluation__(self,all_pred,all_gt,gt_count):
