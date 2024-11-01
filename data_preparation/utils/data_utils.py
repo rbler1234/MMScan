@@ -1,6 +1,8 @@
 import numpy as np
 from tqdm import tqdm
-def read_annotation_pickle(path:str, show_progress:bool =True):
+
+
+def read_annotation_pickle(path: str, show_progress: bool = True):
     """Read annotation pickle file and return a dictionary, the embodiedscan
     annotation for all scans in the split.
 
@@ -27,19 +29,23 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
     object_int_to_type = {v: k for k, v in object_type_to_int.items()}
     datalist = data["data_list"]
     output_data = {}
-    pbar = tqdm(range(len(datalist))) if show_progress else range(len(datalist))
+    pbar = (
+        tqdm(range(len(datalist))) if show_progress else range(len(datalist))
+    )
     for scene_idx in pbar:
-        #print(datalist[scene_idx]['sample_idx'])
+        # print(datalist[scene_idx]['sample_idx'])
         # if "matterport3d" not in datalist[scene_idx]['sample_idx']:
         #     continue
-        #print(datalist[scene_idx].keys())
+        # print(datalist[scene_idx].keys())
         images = datalist[scene_idx]["images"]
-        #print(images[0].keys())
+        # print(images[0].keys())
 
         intrinsic = datalist[scene_idx].get("cam2img", None)  # a 4x4 matrix
         missing_intrinsic = False
         if intrinsic is None:
-            missing_intrinsic = True  # each view has different intrinsic for mp3d
+            missing_intrinsic = (
+                True  # each view has different intrinsic for mp3d
+            )
         depth_intrinsic = datalist[scene_idx].get(
             "cam2depth", None
         )  # a 4x4 matrix, for 3rscan
@@ -47,9 +53,11 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
             depth_intrinsic = datalist[scene_idx][
                 "depth_cam2img"
             ]  # a 4x4 matrix, for scannet
-        axis_align_matrix = datalist[scene_idx]["axis_align_matrix"]  # a 4x4 matrix
+        axis_align_matrix = datalist[scene_idx][
+            "axis_align_matrix"
+        ]  # a 4x4 matrix
 
-        scene_id = datalist[scene_idx]['sample_idx']
+        scene_id = datalist[scene_idx]["sample_idx"]
 
         instances = datalist[scene_idx]["instances"]
         bboxes = []
@@ -108,13 +116,13 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
             "object_types": object_types,
             "object_type_ints": object_type_ints,
             # image level
-            "visible_instance_ids":visible_view_object_list,
+            "visible_instance_ids": visible_view_object_list,
             "visible_view_object_dict": visible_view_object_dict,
             "extrinsics_c2w": extrinsics_c2w,
             "axis_align_matrix": axis_align_matrix,
             "intrinsics": intrinsics,
             "depth_intrinsics": depth_intrinsics,
             "image_paths": image_paths,
-            "depth_image_paths":depth_image_paths,
+            "depth_image_paths": depth_image_paths,
         }
     return output_data

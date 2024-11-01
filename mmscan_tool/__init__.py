@@ -1,4 +1,5 @@
 from mmscan_tool.mmscan import MMScan
+
 try:
     from mmscan_tool.evaluator.vg_evaluation import VG_Evaluator
 except:

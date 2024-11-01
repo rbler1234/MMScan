@@ -4,8 +4,8 @@ import os
 from tqdm import tqdm
 from scipy.spatial.transform import Rotation as R
 
-def load_json(path:str):
 
+def load_json(path: str):
     """Check the path and read the json file.
 
     Args:
@@ -18,7 +18,8 @@ def load_json(path:str):
         data = json.load(f)
     return data
 
-def read_annotation_pickle(path:str, show_progress:bool =True):
+
+def read_annotation_pickle(path: str, show_progress: bool = True):
     """Read annotation pickle file and return a dictionary, the embodiedscan
     annotation for all scans in the split.
 
@@ -47,19 +48,23 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
     object_int_to_type = {v: k for k, v in object_type_to_int.items()}
     datalist = data["data_list"]
     output_data = {}
-    pbar = tqdm(range(len(datalist))) if show_progress else range(len(datalist))
+    pbar = (
+        tqdm(range(len(datalist))) if show_progress else range(len(datalist))
+    )
     for scene_idx in pbar:
-        #print(datalist[scene_idx]['sample_idx'])
+        # print(datalist[scene_idx]['sample_idx'])
         # if "matterport3d" not in datalist[scene_idx]['sample_idx']:
         #     continue
-        #print(datalist[scene_idx].keys())
+        # print(datalist[scene_idx].keys())
         images = datalist[scene_idx]["images"]
-        #print(images[0].keys())
+        # print(images[0].keys())
 
         intrinsic = datalist[scene_idx].get("cam2img", None)  # a 4x4 matrix
         missing_intrinsic = False
         if intrinsic is None:
-            missing_intrinsic = True  # each view has different intrinsic for mp3d
+            missing_intrinsic = (
+                True  # each view has different intrinsic for mp3d
+            )
         depth_intrinsic = datalist[scene_idx].get(
             "cam2depth", None
         )  # a 4x4 matrix, for 3rscan
@@ -67,9 +72,11 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
             depth_intrinsic = datalist[scene_idx][
                 "depth_cam2img"
             ]  # a 4x4 matrix, for scannet
-        axis_align_matrix = datalist[scene_idx]["axis_align_matrix"]  # a 4x4 matrix
+        axis_align_matrix = datalist[scene_idx][
+            "axis_align_matrix"
+        ]  # a 4x4 matrix
 
-        scene_id = datalist[scene_idx]['sample_idx']
+        scene_id = datalist[scene_idx]["sample_idx"]
 
         instances = datalist[scene_idx]["instances"]
         bboxes = []
@@ -128,14 +135,14 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
             "object_types": object_types,
             "object_type_ints": object_type_ints,
             # image level
-            "visible_instance_ids":visible_view_object_list,
+            "visible_instance_ids": visible_view_object_list,
             "visible_view_object_dict": visible_view_object_dict,
             "extrinsics_c2w": extrinsics_c2w,
             "axis_align_matrix": axis_align_matrix,
             "intrinsics": intrinsics,
             "depth_intrinsics": depth_intrinsics,
             "image_paths": image_paths,
-            "depth_image_paths":depth_image_paths,
+            "depth_image_paths": depth_image_paths,
         }
     return output_data
 
@@ -148,33 +155,40 @@ class id_mapping:
 
     def __init__(self, mp3d_mapping_path):
         def reverse_dict(mapping):
-            re_mapping = {mapping[k]:k for k in mapping.keys()}
+            re_mapping = {mapping[k]: k for k in mapping.keys()}
             return re_mapping
 
-        with open(mp3d_mapping_path,'r') as f:
+        with open(mp3d_mapping_path, "r") as f:
             self.mp3d_mapping = json.load(f)
 
         self.mp3d_mapping_trans = reverse_dict(self.mp3d_mapping)
 
-
-    def forward(self,scan_name):
-        if 'matterport3d/' in scan_name:
-            scan_,region_ = self.mp3d_mapping[scan_name.split('/')[1]],scan_name.split('/')[2]
-            return scan_+'_'+region_
-        elif '3rscan' in scan_name:
-            return scan_name.split('/')[1]
-        elif 'scannet' in scan_name:
-            return scan_name.split('/')[1]
+    def forward(self, scan_name):
+        if "matterport3d/" in scan_name:
+            scan_, region_ = (
+                self.mp3d_mapping[scan_name.split("/")[1]],
+                scan_name.split("/")[2],
+            )
+            return scan_ + "_" + region_
+        elif "3rscan" in scan_name:
+            return scan_name.split("/")[1]
+        elif "scannet" in scan_name:
+            return scan_name.split("/")[1]
         else:
             raise ValueError(f"{scan_name} is not a scan name")
 
-    def backward(self,scan_name):
-        if '1mp3d' in scan_name:
-            scene1,scene2,region = scan_name.split('_')
-            return 'matterport3d/'+self.mp3d_mapping_trans[scene1+'_'+scene2]+'/'+region
-        elif '3rscan' in scan_name:
-            return '3rscan/'+scan_name
-        elif 'scene' in scan_name:
-            return 'scannet/'+scan_name
+    def backward(self, scan_name):
+        if "1mp3d" in scan_name:
+            scene1, scene2, region = scan_name.split("_")
+            return (
+                "matterport3d/"
+                + self.mp3d_mapping_trans[scene1 + "_" + scene2]
+                + "/"
+                + region
+            )
+        elif "3rscan" in scan_name:
+            return "3rscan/" + scan_name
+        elif "scene" in scan_name:
+            return "scannet/" + scan_name
         else:
             raise ValueError(f"{scan_name} is not a scan name")

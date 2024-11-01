@@ -12,7 +12,11 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from mmscan_tool.utils.data_io import read_annotation_pickle,id_mapping,load_json
+from mmscan_tool.utils.data_io import (
+    read_annotation_pickle,
+    id_mapping,
+    load_json,
+)
 from mmscan_tool.utils.box_utils import __9DOF_to_6DOF__
 from mmscan_tool.utils.task_utils import anno_token_flatten
 
@@ -22,6 +26,7 @@ if not PYTHON_VERSION == 3:
     raise ValueError("MMScan dev-kit only supports Python version 3.")
 
 ENV_PATH = os.path.abspath(__file__)
+
 
 class MMScan(Dataset):
     """Database class for MMScan to help query and retrieve information from
@@ -46,76 +51,108 @@ class MMScan(Dataset):
                             flatten the tokens or not. Defaults to True.
     """
 
-    def __init__(self,
-                 version: str = 'v1',
-                 split: str = 'train',
-                 dataroot: str = '',
-                 task: str = None,
-                 ratio: float = 1.0,
-                 verbose: bool = False,
-                 check_mode:bool = False,
-                 token_flatten: bool = True
-                 ):
+    def __init__(
+        self,
+        version: str = "v1",
+        split: str = "train",
+        dataroot: str = "",
+        task: str = None,
+        ratio: float = 1.0,
+        verbose: bool = False,
+        check_mode: bool = False,
+        token_flatten: bool = True,
+    ):
         """Initialize the database, prepare the embodeidscan annotation."""
         super(MMScan, self).__init__()
         self.version = version
-        if len(dataroot)>0:
+        if len(dataroot) > 0:
             self.dataroot = dataroot
         else:
-            self.dataroot = '/mnt/petrelfs/linjingli/mmscan_db/mmscan_data'
+            self.dataroot = "/mnt/petrelfs/linjingli/mmscan_db/mmscan_data"
             # TODO: change this
-            #os.path.join(os.path.dirname(os.path.dirname(ENV_PATH)),'mmscan_data')
+            # os.path.join(os.path.dirname(os.path.dirname(ENV_PATH)),'mmscan_data')
         self.verbose = verbose
 
         # now we skip the test split because we don not provide ground truth for the test split.
-        if split == 'test':
-            split = 'val'
+        if split == "test":
+            split = "val"
         self.split = split
         self.check_mode = check_mode
         if self.check_mode:
             print("embodiedscan's checking mode!!!")
-        self.pkl_name = '{}/embodiedscan-split/embodiedscan-{}/embodiedscan_infos_{}.pkl'.\
-            format(self.dataroot, self.version, split)
-        self.data_path = '{}/embodiedscan-split/data'.format(self.dataroot)
-        self.lang_anno_path = '{}/MMScan-beta-release'.format(self.dataroot)
+        self.pkl_name = "{}/embodiedscan-split/embodiedscan-{}/embodiedscan_infos_{}.pkl".format(
+            self.dataroot, self.version, split
+        )
+        self.data_path = "{}/embodiedscan-split/data".format(self.dataroot)
+        self.lang_anno_path = "{}/MMScan-beta-release".format(self.dataroot)
 
-        self.pcd_path = '{}/embodiedscan-split/process_pcd'.format(self.dataroot)
+        self.pcd_path = "{}/embodiedscan-split/process_pcd".format(
+            self.dataroot
+        )
 
-        self.mapping_json_path = '{}/embodiedscan-split/data_info/mp3d_mapping.json'.format(self.dataroot)
+        self.mapping_json_path = (
+            "{}/embodiedscan-split/data_info/mp3d_mapping.json".format(
+                self.dataroot
+            )
+        )
         # TODO: change this
         #'{}/../data_preparation/meta-data/mp3d_mapping.json'.format(self.dataroot)
         self.id_mapping = id_mapping(self.mapping_json_path)
-        self.table_names = ["es_file","pc_file","point_clouds","bboxes","object_ids","object_types","object_type_ints",
-                            "visible_view_object_dict","extrinsics_c2w","axis_align_matrix","intrinsics",
-                            "depth_intrinsics","image_paths","depth_image_paths","visible_instance_ids"]
-        self.lang_tasks = \
-        ["MMScan-QA","MMScan-VG","MMScan-DC"]
-        self.task_anno_mapping = \
-            {"MMScan-QA":"MMScan_QA.json","MMScan-VG":"MMScan_VG.json"
-            ,"MMScan-DC":None}
-
+        self.table_names = [
+            "es_file",
+            "pc_file",
+            "point_clouds",
+            "bboxes",
+            "object_ids",
+            "object_types",
+            "object_type_ints",
+            "visible_view_object_dict",
+            "extrinsics_c2w",
+            "axis_align_matrix",
+            "intrinsics",
+            "depth_intrinsics",
+            "image_paths",
+            "depth_image_paths",
+            "visible_instance_ids",
+        ]
+        self.lang_tasks = ["MMScan-QA", "MMScan-VG", "MMScan-DC"]
+        self.task_anno_mapping = {
+            "MMScan-QA": "MMScan_QA.json",
+            "MMScan-VG": "MMScan_VG.json",
+            "MMScan-DC": None,
+        }
 
         # Part1: prepare the embodeidscan annotation.
-        assert osp.exists(self.pkl_name), 'Database not found: {}'.format(self.pkl_name)
+        assert osp.exists(self.pkl_name), "Database not found: {}".format(
+            self.pkl_name
+        )
         if verbose:
             start = time.time()
         self.embodiedscan_anno = self.__load_base_anno__(self.pkl_name)
         if verbose:
-            print("======\nLoading embodiedscan-{} for split {}, using {} seconds".\
-                format(self.version,self.split,time.time()-start))
-
+            print(
+                "======\nLoading embodiedscan-{} for split {}, using {} seconds".format(
+                    self.version, self.split, time.time() - start
+                )
+            )
 
         # Part2: prepare the MMScan annotation.
         self.task = task
-        assert self.task_anno_mapping.get(task,None) is not None, \
-            "Task {} is not supported yet".format(task)
+        assert (
+            self.task_anno_mapping.get(task, None) is not None
+        ), "Task {} is not supported yet".format(task)
         if verbose:
             start = time.time()
-        self.mmscan_scan_id = load_json(f'{self.lang_anno_path}/Data_splits/{self.split}-split.json')
-        self.mmscan_anno = \
-            load_json(f'{self.lang_anno_path}/MMScan_samples/{self.task_anno_mapping[task]}')[self.split]
+        self.mmscan_scan_id = load_json(
+            f"{self.lang_anno_path}/Data_splits/{self.split}-split.json"
+        )
+        self.mmscan_anno = load_json(
+            f"{self.lang_anno_path}/MMScan_samples/{self.task_anno_mapping[task]}"
+        )[self.split]
         if ratio < 1.0:
-            self.mmscan_anno = self.__downsample_annos__(self.mmscan_anno,ratio)
+            self.mmscan_anno = self.__downsample_annos__(
+                self.mmscan_anno, ratio
+            )
         if self.check_mode:
             self.mmscan_anno = self.mmscan_anno[:100]
         if self.task == "MMScan-VG" and token_flatten:
@@ -124,12 +161,13 @@ class MMScan(Dataset):
         self.data_collect()
         if verbose:
             end = time.time()
-            print("==================\nLoading {} split for the {} task, using {} seconds."\
-                .format(self.split,self.task,end-start))
-
+            print(
+                "==================\nLoading {} split for the {} task, using {} seconds.".format(
+                    self.split, self.task, end - start
+                )
+            )
 
     def __getitem__(self, index_):
-
         """return the sample item corresponding to the index. The item
         contains: (1) scan-level "ori_pcds" (tuple[tensor]): the raw data read
         from the pth file, contains in order (pcd coordinates, pcd colors, pcd
@@ -181,18 +219,17 @@ class MMScan(Dataset):
         data_dict = {}
         data_dict["index"] = index_
 
-
         # (2) loading the data
         scan_idx = self.MMScan_collect["anno"][index_]["scan_id"]
         pcd_info = self.__process_pcd_info__(scan_idx)
         images_info = self.__process_img_info__(scan_idx)
         box_info = self.__process_box_info__(scan_idx)
 
-        data_dict["ori_pcds"] = pcd_info['ori_pcds']
-        data_dict["pcds"] = pcd_info['pcds']
-        data_dict["obj_pcds"] = pcd_info['obj_pcds']
-        data_dict['instance_labels'] = pcd_info['instance_labels']
-        data_dict['class_labels'] = pcd_info['class_labels']
+        data_dict["ori_pcds"] = pcd_info["ori_pcds"]
+        data_dict["pcds"] = pcd_info["pcds"]
+        data_dict["obj_pcds"] = pcd_info["obj_pcds"]
+        data_dict["instance_labels"] = pcd_info["instance_labels"]
+        data_dict["class_labels"] = pcd_info["class_labels"]
         data_dict["bboxes"] = box_info
         data_dict["images"] = images_info
 
@@ -202,8 +239,6 @@ class MMScan(Dataset):
 
         return data_dict
 
-
-
     def __len__(self):
         assert self.task is not None, "Please set the task first!"
         return len(self.MMScan_collect["anno"])
@@ -211,16 +246,16 @@ class MMScan(Dataset):
     @property
     def show_possess(self) -> List[str]:
         """
-            Returns:
-                list[str]: All data classes present in Embodiedscan database.
+        Returns:
+            list[str]: All data classes present in Embodiedscan database.
         """
         return self.table_names
 
     @property
     def show_mmscan_id(self) -> List[str]:
         """
-            Returns:
-                list[str]: All data classes present in Embodiedscan database.
+        Returns:
+            list[str]: All data classes present in Embodiedscan database.
         """
         assert self.task is not None, "Please set the task first!"
         return self.mmscan_scan_id
@@ -228,14 +263,11 @@ class MMScan(Dataset):
     @property
     def samples(self):
         """
-            Returns:
-                list[dict]: All samples in the MMScan language task.
+        Returns:
+            list[dict]: All samples in the MMScan language task.
         """
         assert self.task is not None, "Please set the task first!"
         return self.MMScan_collect["anno"]
-
-
-
 
     def get_possess(self, table_name: str, scan_idx: str):
         """Getting all database about the scan from embodeidscan.
@@ -246,21 +278,22 @@ class MMScan(Dataset):
         Returns:
             The data corresponding to the table_name and scan_idx.
         """
-        assert table_name in self.table_names, \
-            "Table {} not found".format(table_name)
+        assert table_name in self.table_names, "Table {} not found".format(
+            table_name
+        )
 
         if table_name == "point_clouds":
-            return torch.load(\
-            f'{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth')
+            return torch.load(
+                f"{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth"
+            )
         elif table_name == "es_file":
             return deepcopy(self.pkl_name)
         elif table_name == "pc_file":
-            return f'{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth'
+            return f"{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth"
         else:
             return self.embodiedscan_anno[scan_idx][table_name]
 
-
-    def data_collect(self)->dict:
+    def data_collect(self) -> dict:
         """Collecting the MMScan samples.
 
         Store them in self.MMScan_collect. MMScan QA samples need to be
@@ -270,16 +303,15 @@ class MMScan(Dataset):
         assert self.task is not None, "Please set the task first!"
         self.MMScan_collect = {}
 
-
         #  MMScan anno processing
         if self.task == "MMScan-QA":
             self.MMScan_collect["anno"] = []
 
             for sample in self.mmscan_anno:
-                if self.split == 'train':
+                if self.split == "train":
                     for answer in sample["answers"]:
                         sub_sample = deepcopy(sample)
-                        sub_sample['answers'] = [answer]
+                        sub_sample["answers"] = [answer]
                         self.MMScan_collect["anno"].append(sub_sample)
                 else:
                     self.MMScan_collect["anno"].append(sample)
@@ -288,7 +320,6 @@ class MMScan(Dataset):
             self.MMScan_collect["anno"] = self.mmscan_anno
         else:
             raise NotImplementedError
-
 
     def __filter_lang_anno__(self, samples):
         """Check and  the annotation is valid or not.
@@ -317,8 +348,10 @@ class MMScan(Dataset):
             bool : Whether the item is valid or not.
         """
         if self.task == "MMScan-VG":
-            return len(sample["target"])==len(sample['target_id']) \
-                and len(sample['target_id'])>0
+            return (
+                len(sample["target"]) == len(sample["target_id"])
+                and len(sample["target_id"]) > 0
+            )
 
         return True
 
@@ -332,8 +365,7 @@ class MMScan(Dataset):
             dict : The embodiedscan annotations of scans.
             (with scan_idx as keys)
         """
-        return read_annotation_pickle(pkl_path,show_progress=self.verbose)
-
+        return read_annotation_pickle(pkl_path, show_progress=self.verbose)
 
     def __process_pcd_info__(self, scan_idx: str):
         """Retrieve the corresponding scan information based on the input scan
@@ -346,29 +378,30 @@ class MMScan(Dataset):
             dict : corresponding scan information.
         """
 
-        assert scan_idx in self.embodiedscan_anno.keys(), \
-            "Scan {} is not in {} split".format(scan_idx,self.split)
+        assert (
+            scan_idx in self.embodiedscan_anno.keys()
+        ), "Scan {} is not in {} split".format(scan_idx, self.split)
 
         scan_info = {}
-        pcd_data = torch.load(\
-            f'{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth')
+        pcd_data = torch.load(
+            f"{self.pcd_path}/{self.id_mapping.forward(scan_idx)}.pth"
+        )
         points, colors, class_labels, instance_labels = pcd_data
 
         pcds = np.concatenate([points, colors], 1)
-        scan_info['ori_pcds'] = deepcopy(pcd_data)
-        scan_info['pcds'] = deepcopy(pcds)
+        scan_info["ori_pcds"] = deepcopy(pcd_data)
+        scan_info["pcds"] = deepcopy(pcds)
 
         obj_pcds = {}
         for i in range(instance_labels.max() + 1):
             mask = instance_labels == i
-            if len(pcds[mask])>0:
+            if len(pcds[mask]) > 0:
                 obj_pcds.update({i: pcds[mask]})
 
-        scan_info['obj_pcds'] = obj_pcds
-        scan_info['scene_center'] = \
-            (points.max(0) + points.min(0)) / 2
-        scan_info['instance_labels'] = np.array(instance_labels)
-        scan_info['class_labels'] = np.array(class_labels)
+        scan_info["obj_pcds"] = obj_pcds
+        scan_info["scene_center"] = (points.max(0) + points.min(0)) / 2
+        scan_info["instance_labels"] = np.array(instance_labels)
+        scan_info["class_labels"] = np.array(class_labels)
         return scan_info
 
     def __process_box_info__(self, scan_idx: str):
@@ -384,17 +417,17 @@ class MMScan(Dataset):
             dict : corresponding bounding boxes
             information.
         """
-        assert scan_idx in self.embodiedscan_anno.keys(), \
-            "Scan {} is not in {} split".format(scan_idx,self.split)
+        assert (
+            scan_idx in self.embodiedscan_anno.keys()
+        ), "Scan {} is not in {} split".format(scan_idx, self.split)
 
-        bboxes = \
-            deepcopy(self.get_possess("bboxes",scan_idx))
-        object_ids = \
-            deepcopy(self.get_possess("object_ids",scan_idx))
-        object_types = \
-            deepcopy(self.get_possess("object_types",scan_idx))
-        return {object_ids[i]: {"bbox":bboxes[i], \
-            "type":object_types[i]} for i in range(len(object_ids))}
+        bboxes = deepcopy(self.get_possess("bboxes", scan_idx))
+        object_ids = deepcopy(self.get_possess("object_ids", scan_idx))
+        object_types = deepcopy(self.get_possess("object_types", scan_idx))
+        return {
+            object_ids[i]: {"bbox": bboxes[i], "type": object_types[i]}
+            for i in range(len(object_ids))
+        }
 
     def __process_img_info__(self, scan_idx: str):
         """Retrieve the corresponding camera information based on the input
@@ -407,23 +440,29 @@ class MMScan(Dataset):
             list[dict] : corresponding information
             for each camera.
         """
-        assert scan_idx in self.embodiedscan_anno.keys(), \
-            "Scan {} is not in {} split".format(scan_idx,self.split)
+        assert (
+            scan_idx in self.embodiedscan_anno.keys()
+        ), "Scan {} is not in {} split".format(scan_idx, self.split)
 
         img_info = dict()
-        img_info['img_path'] = \
-            deepcopy(self.get_possess("image_paths",scan_idx))
-        img_info['depth_img_path'] = \
-            deepcopy(self.get_possess("depth_image_paths",scan_idx))
-        img_info['intrinsic'] = \
-            deepcopy(self.get_possess("intrinsics",scan_idx))
-        img_info['depth_intrinsic'] = \
-            deepcopy(self.get_possess("depth_intrinsics",scan_idx))
-        img_info['extrinsic'] = \
-            deepcopy(self.get_possess("extrinsics_c2w",scan_idx))
-        img_info['visible_instance_id'] \
-            = deepcopy(self.get_possess("visible_instance_ids",scan_idx))
-
+        img_info["img_path"] = deepcopy(
+            self.get_possess("image_paths", scan_idx)
+        )
+        img_info["depth_img_path"] = deepcopy(
+            self.get_possess("depth_image_paths", scan_idx)
+        )
+        img_info["intrinsic"] = deepcopy(
+            self.get_possess("intrinsics", scan_idx)
+        )
+        img_info["depth_intrinsic"] = deepcopy(
+            self.get_possess("depth_intrinsics", scan_idx)
+        )
+        img_info["extrinsic"] = deepcopy(
+            self.get_possess("extrinsics_c2w", scan_idx)
+        )
+        img_info["visible_instance_id"] = deepcopy(
+            self.get_possess("visible_instance_ids", scan_idx)
+        )
 
         img_info_list = []
         for camera_index in range(len(img_info["img_path"])):
@@ -433,10 +472,7 @@ class MMScan(Dataset):
             img_info_list.append(item)
         return img_info_list
 
-
-
-    def down_9DOF_to_6DOF(self, pcd,\
-        box_9DOF) -> np.ndarray:
+    def down_9DOF_to_6DOF(self, pcd, box_9DOF) -> np.ndarray:
         """Transform the 9DOF bounding box to 6DOF bounding box. Find the
         minimum bounding boxes to cover all the point clouds.
 
@@ -450,9 +486,7 @@ class MMScan(Dataset):
                 The transformed 6DOF bounding box.
         """
 
-
-        return __9DOF_to_6DOF__(pcd,box_9DOF)
-
+        return __9DOF_to_6DOF__(pcd, box_9DOF)
 
     def __downsample_annos__(self, annos: List[dict], ratio: float):
         """downsample the annotations with a given ratio.
@@ -465,13 +499,13 @@ class MMScan(Dataset):
         """
         d_annos = []
         for index in range(len(annos)):
-            if index % int(1/ratio) == 0:
+            if index % int(1 / ratio) == 0:
                 d_annos.append(annos[index])
         return d_annos
 
 
-if __name__ =="__main__":
-    test = EmbodiedScan(version='v1', split='val', verbose=True)
-    test.set_lang_task('MMScan-VG')
+if __name__ == "__main__":
+    test = EmbodiedScan(version="v1", split="val", verbose=True)
+    test.set_lang_task("MMScan-VG")
     print(len(test))
     print(test[10])
