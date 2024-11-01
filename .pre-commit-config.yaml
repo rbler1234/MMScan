@@ -5,6 +5,16 @@ repos:
     rev: v3.2.0
     hooks:
     -   id: trailing-whitespace
+        exclude: '^models/.*'
     -   id: end-of-file-fixer
+        exclude: '^models/.*'
     -   id: check-yaml
+        exclude: '^models/.*'
     -   id: check-added-large-files
+        exclude: '^models/.*'
+-   repo: https://github.com/myint/docformatter
+    rev: v1.3.1
+    hooks:
+      - id: docformatter
+        args: ["--in-place", "--wrap-descriptions", "79"]
+        exclude: '^models/.*'
