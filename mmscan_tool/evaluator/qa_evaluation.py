@@ -7,8 +7,9 @@ from mmscan_tool.utils.lang_utils import special_token_filter
 
 class QA_Evaluator():
 
-    """
-       tradition metrics for QA and Caption evaluation , consists the implements of
+    """tradition metrics for QA and Caption evaluation , consists the
+    implements of.
+
        [EM, BLEU, METEOR, ROUGE, CIDEr, SPICE, SIMCSE, SBERT]
 
        SIMCSE, SBERT is speacial metrics and needed GPU tools.
@@ -16,9 +17,9 @@ class QA_Evaluator():
     Attributes:
 
         save_buffer(list[dict]): Save the buffer of Inputs
-        
+
         records(list[dict]): Metric results for each sample
-        
+
         metric_record(dict): Metric results for each category
             (average of all samples with the same category)
     Args:
@@ -28,7 +29,6 @@ class QA_Evaluator():
                     Defaults to 1024.
         verbose(bool): Whether to print the evaluation results.
                     Defaults to True.
-
     """
 
 
@@ -63,21 +63,21 @@ class QA_Evaluator():
 
     def update(self,batch_input):
 
-        """ Update a batch of results to the buffer,
-            and then filtering and truncating.
-            each item is expected to be a dict with keys
-            ["index", "ID","question","pred",""gt"]
+        """Update a batch of results to the buffer, and then filtering and
+        truncating. each item is expected to be a dict with keys.
 
-            1. pred is a list with one one element.
-            2. gt is a list with >=1 elements.
-            3. "ID" should be unique!!!!
+        ["index", "ID","question","pred",""gt"]
 
-            Args:
-                batch_input (list[dict]):
-                a batch of the raw original input
-            Returns:
-                Dict: {"EM":EM metric for this batch,
-                "refined_EM":refined EM metric for this batch}
+        1. pred is a list with one one element.
+        2. gt is a list with >=1 elements.
+        3. "ID" should be unique!!!!
+
+        Args:
+            batch_input (list[dict]):
+            a batch of the raw original input
+        Returns:
+            Dict: {"EM":EM metric for this batch,
+            "refined_EM":refined EM metric for this batch}
         """
 
         self.__check_format__(batch_input)
@@ -97,8 +97,9 @@ class QA_Evaluator():
 
     def start_evaluation(self):
         """Start the evaluation process.
-            Returns:
-                dict: the metrics
+
+        Returns:
+            dict: the metrics
         """
 
         # (1) exact match evaluation

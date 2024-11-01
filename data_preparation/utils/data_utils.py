@@ -1,9 +1,8 @@
 import numpy as np
 from tqdm import tqdm
 def read_annotation_pickle(path:str, show_progress:bool =True):
-    """
-    Read annotation pickle file and return a dictionary, the embodiedscan annotation for
-    all scans in the split.
+    """Read annotation pickle file and return a dictionary, the embodiedscan
+    annotation for all scans in the split.
 
     Args:
         path (str): the path of the annotation pickle file.

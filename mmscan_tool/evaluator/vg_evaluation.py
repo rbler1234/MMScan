@@ -12,24 +12,20 @@ from mmscan_tool.evaluator.metrics.box_metric \
 
 
 class VG_Evaluator():
-    """
-
-    Evaluator for MMScan Visual Grounding benchmark.
-
+    """Evaluator for MMScan Visual Grounding benchmark.
 
     Attributes:
         eval_metric: All the evaluation metric, includes
-                    "AP","AP_C","AR","Acc_topk"
+                    "AP","AP_C","AR","gTop-k"
         save_buffer(list[dict]): Save the buffer of Inputs
-        
+
         records(list[dict]): Metric results for each sample
-        
+
         category_records(dict): Metric results for each category
             (average of all samples with the same category)
-    Args:        
+    Args:
         verbose(bool): Whether to print the evaluation results.
                     Defaults to True.
-
     """
 
 
@@ -41,7 +37,7 @@ class VG_Evaluator():
         self.call_for_category_mode = True
 
         for top_k in [1,3,5,10]:
-            self.eval_metric_type.append(f"Acc_top{top_k}")
+            self.eval_metric_type.append(f"gTop-{top_k}")
 
         self.iou_thresholds = [0.25,0.50]
         self.eval_metric = []
@@ -57,28 +53,28 @@ class VG_Evaluator():
         self.category_records = {}
 
     def update(self,raw_batch_input):
-        """ Update a batch of results to the buffer.
+        """Update a batch of results to the buffer.
 
-            Args:
-                raw_batch_input (list[dict]):
-                a batch of the raw original input
+        Args:
+            raw_batch_input (list[dict]):
+            a batch of the raw original input
         """
         self.__check_format__(raw_batch_input)
         self.save_buffer.extend(raw_batch_input)
 
     def start_evaluation(self):
-        """
-            This function is used to start the evaluation process.
-            It will iterate over the saved buffer and evaluate each item.
+        """This function is used to start the evaluation process.
+
+        It will iterate over the saved buffer and evaluate each item.
         """
 
         category_collect = {}
-        
-        
+
+
         for data_item in tqdm(self.save_buffer):
 
             metric_for_single = {}
-            
+
             # (1) len(gt)==0 : skip
             if len(data_item['gt_bboxes']['center'])==0:
                 continue
@@ -89,7 +85,7 @@ class VG_Evaluator():
                 for iou_thr in self.iou_thresholds:
                     metric_for_single[f"AP@{iou_thr}"] = 0
                     for topk in [1,3,5,10]:
-                        metric_for_single[f"Acc_top{topk}@{iou_thr}"] = 0
+                        metric_for_single[f"gTop-{topk}@{iou_thr}"] = 0
 
 
                 data_item["num_gts"] = len(data_item['gt_bboxes']['center'])
@@ -102,7 +98,7 @@ class VG_Evaluator():
                 category = self.__category_mapping__(data_item["subclass"])
                 if category not in category_collect.keys():
                     category_collect[category] = {'ious':[],'scores':[],'sample_indices':[],'cnt':0}
-                
+
                 category_collect[category]['ious'].extend(iou_array)
                 category_collect[category]['scores'].extend(pred_score)
                 category_collect[category]['sample_indices'].extend([data_item['index']]*len(iou_array))
@@ -122,19 +118,19 @@ class VG_Evaluator():
             data_item["num_gts"] = iou_array.shape[1]
             data_item.update(metric_for_single)
             self.records.append(data_item)
-        
+
         self.collect_result()
-        
-        
+
+
         if self.call_for_category_mode:
-            
-   
+
+
             for iou_thr in self.iou_thresholds:
                 self.category_records["overall"][f"AP_C@{iou_thr}"] = 0
                 self.category_records["overall"][f"AR_C@{iou_thr}"] = 0
-                
+
                 for category in category_collect:
-                    
+
                     AP_C,AR_C = compute_for_subset(category_collect[category],iou_thr)
                     self.category_records[category][f"AP_C@{iou_thr}"] = AP_C
                     self.category_records[category][f"AR_C@{iou_thr}"] = AR_C
@@ -142,16 +138,16 @@ class VG_Evaluator():
                         +=AP_C*category_collect[category]['cnt']/len(self.records)
                     self.category_records["overall"][f"AR_C@{iou_thr}"] \
                         +=AR_C*category_collect[category]['cnt']/len(self.records)
-       
+
         return self.category_records
 
 
     def collect_result(self):
-        """
-           Collect the result from the evaluation process.
-           Stores them based on some subclass.
-           Returns:
-                category_results(dict): Average results per category
+        """Collect the result from the evaluation process.
+
+        Stores them based on some subclass.
+        Returns:
+             category_results(dict): Average results per category
         """
         category_results = {}
         category_results["overall"] = {}
@@ -167,7 +163,7 @@ class VG_Evaluator():
             if category not in category_results:
                 category_results[category] = {}
                 for metric_name in self.eval_metric:
-                
+
                     category_results[category][metric_name] = []
                     category_results[category]["num_gts"] = 0
 
@@ -188,10 +184,10 @@ class VG_Evaluator():
         return category_results
 
     def print_result(self):
-        """
-            Showing the result table.
-            Returns:
-                table(str): the metric result table
+        """Showing the result table.
+
+        Returns:
+            table(str): the metric result table
         """
         assert len(self.category_records)>0, "No result yet."
         self.category_records = {key: self.category_records[key] for key in \
@@ -203,10 +199,10 @@ class VG_Evaluator():
 
         # some metrics
         for iou_thr in self.iou_thresholds:
-            show_in_table = ['AP','AR']+[f'Top-{k}' for k in self.top_k_visible] \
+            show_in_table = ['AP','AR']+[f'gTop-{k}' for k in self.top_k_visible] \
                 if not self.call_for_category_mode else \
-                    ['AP','AR','AP_C','AP_R']+[f'Top-{k}' for k in self.top_k_visible]
-            
+                    ['AP','AR','AP_C','AR_C']+[f'gTop-{k}' for k in self.top_k_visible]
+
             for metric_type in show_in_table:
                 table_columns[0].append(metric_type+' '+str(iou_thr))
 
@@ -215,14 +211,14 @@ class VG_Evaluator():
                 ar = self.category_records[category][f"AR@{iou_thr}"]
                 table_columns[i+1].append(f'{float(ap):.4f}')
                 table_columns[i+1].append(f'{float(ar):.4f}')
-                
+
                 ap = self.category_records[category][f"AP_C@{iou_thr}"]
                 ar = self.category_records[category][f"AR_C@{iou_thr}"]
                 table_columns[i+1].append(f'{float(ap):.4f}')
                 table_columns[i+1].append(f'{float(ar):.4f}')
                 for k in self.top_k_visible:
                     top_k = self.category_records[category]\
-                        [f"Acc_top{k}@{iou_thr}"]
+                        [f"gTop-{k}@{iou_thr}"]
                     table_columns[i+1].append(f'{float(top_k):.4f}')
 
         # Number of gts
@@ -244,14 +240,13 @@ class VG_Evaluator():
         return table.table
 
     def __category_mapping__(self,sub_class):
-        """
-           Mapping the subclass name to the category name.
+        """Mapping the subclass name to the category name.
 
-           Args:
-                sub_class (str): the subclass name in the original samples
+        Args:
+             sub_class (str): the subclass name in the original samples
 
-           Returns:
-                category (str): the category name.
+        Returns:
+             category (str): the category name.
         """
         sub_class = sub_class.lower()
         sub_class = sub_class.replace('single', 'sngl')
@@ -264,15 +259,14 @@ class VG_Evaluator():
         return sub_class
 
     def __calculate_iou_array_(self, data_item):
-        """
-           Calculate some information needed for eavl.
+        """Calculate some information needed for eavl.
 
-           Args:
-                data_item (dict): the subclass name in the original samples
-           Returns:
-                nd.array, int, int :
-                the iou array sorted by the confidence,
-                number of predictions, number of gts.
+        Args:
+             data_item (dict): the subclass name in the original samples
+        Returns:
+             nd.array, int, int :
+             the iou array sorted by the confidence,
+             number of predictions, number of gts.
         """
 
         pred_bboxes = data_item["pred_bboxes"]
@@ -306,10 +300,9 @@ class VG_Evaluator():
 
     def __check_format__(self,raw_input):
 
-        """
-            Check if the input conform with mmscan evaluation format.
-            transform 9 DoF box to ('center'/'size'/'rot_matrix')
+        """Check if the input conform with mmscan evaluation format.
 
+        transform 9 DoF box to ('center'/'size'/'rot_matrix')
         """
         assert isinstance(raw_input,list), \
             "The input of MMScan evaluator should be a list of dict. "

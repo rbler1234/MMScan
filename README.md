@@ -69,16 +69,16 @@ ing 3D scanning data, the resulting multi-modal 3D dataset encompasses 1.4M
     cd MMScan
     ```
 
-2. Install requirements. 
+2. Install requirements.
 
     Your environment needs to include Python version 3.8 or higher.
 
     ```shell
     conda activate your_env_name
-    python intall.py --all 
+    python intall.py all
     ```
 
-    You can "--VG/QA" if you only need either one of the two.
+    You can "VG/QA" if you only need either one of the two.
 
 ### Data Preparation
 
@@ -151,7 +151,7 @@ You can conveniently use `__get_item__` to access them. Each item is a dictonary
         "target" (list[str]) : The target objects type.
         "anchors" (list[str]) : The anchor objects type.
         "anchor_ids" (list[int]) : The anchor objects id.
-        "tokens_positive" (dict) : Where the object mentioned in the text
+        "tokens_positive" (dict) : Where the object mentioned in the text.
 
 
         for QA task
@@ -163,6 +163,7 @@ You can conveniently use `__get_item__` to access them. Each item is a dictonary
         "input_bboxes" (list[nd.narray]):  the input bounding boxes (9 DoF).
 
 ```
+More explanation of the "tokens_positive" in the VG task: For each target object / anchor object, we stores its relevant words in the grounding text in a format of a list of indices where the word appearing. For example, if the grounding text is "The red chair near the wooden table.", and the target object is "chair" with id 1, and the anchor object is "table" with id 2, the "tokens_positive" will be { 1: [ [ 0, 13 ] ], 2: [ [ 19, 35 ] ] }, since the word "The red chair" appears in the first 13 characters of the text, and the word "the wooden table" appears in characters 19 through 35.
 
 ( 3 ) 2D modality
 
@@ -180,7 +181,7 @@ The value corresponding to the key "images" is a list containing specific camera
           'visible_instance_id'(list): Ds of objects visible
         }
         ...
-    ] 
+    ]
 
 ```
 
@@ -191,7 +192,7 @@ We offer a tool that allows you to easily evaluate the model output in the MMSca
 
 (1) Visual grounding evaluator
 
-for visual grounding task, our evaluator calculate the metric AP, AR, multi-topk.
+For visual grounding task, our evaluator calculate the metric AP, AR, AP_C, AR_C, gtop-k. AP and AR are obtained by calculating the average precision and recall, treating each of samples as a separate category, while those end with C treat samples of a same subclass as a same category. And the gtop-k is an extended general version of the top-k metric.
 ```bash
     # whether to show the progress
     my_evaluator = MMScan_VG_evaluator(verbose=True)
@@ -206,7 +207,7 @@ for visual grounding task, our evaluator calculate the metric AP, AR, multi-topk
     # You should reset the evaluator!
     my_evaluator.reset()
 ```
-the input to the evaluator should be in a certain format:
+The input to the evaluator should be in a certain format:
 ```
         "pred_scores" (tensor/ndarray): the confidence for each pred.
                                         (num_pred,1)
@@ -223,7 +224,7 @@ the input to the evaluator should be in a certain format:
 ```
 (2) Question Answering evaluator
 
-for question answering task, our evaluator calculate the metric Bleu-X, Metor, CiDer, Spice, Simcse, Sbert, EM, Refine EM
+For question answering task, our evaluator calculate the metric Bleu-X, Metor, CiDer, Spice, Simcse, Sbert, EM, Refine EM
 ```bash
     # model_config stores the pretrain weights of SIMCSE and SBERT
     my_evaluator = MMScan_QA_evaluator(model_config={},verbose=True)
@@ -237,7 +238,7 @@ for question answering task, our evaluator calculate the metric Bleu-X, Metor, C
     my_evaluator.reset()
 ```
 
-the input to the evaluator should be in a certain format:
+The input to the evaluator should be in a certain format:
 ```
         "qusetion"(str)
         "pred" (list[str]): the prediction, length should be equal 1.
@@ -248,7 +249,7 @@ the input to the evaluator should be in a certain format:
 
 (3) GPT evaluator
 
-for question answering task, we alse provide GPT evaluator, which we 
+For question answering task, we alse provide GPT evaluator, which we
 think it's more reasonable to use.
 ```bash
     # whether to show the progress
@@ -256,10 +257,10 @@ think it's more reasonable to use.
     # the input to the evaluator should be in a certain format.
     # tmp_path to store the result from multi-process
     metric_dict = my_evaluator.load_and_eval(model_output, num_threads=5, tmp_path ='XXX')
-   
+
     my_evaluator.reset()
 ```
-the input to the evaluator should be in a certain format:
+The input to the evaluator should be in a certain format:
 ```
         "qusetion"(str)
         "pred" (list[str]): the prediction, length should be equal 1.
@@ -270,7 +271,7 @@ the input to the evaluator should be in a certain format:
 
 ### Models
 
-We have adapted the MMScan API for some [models](./models/README.md)
+We have adapted the MMScan API for some [models](./models/README.md).
 
 
 ## 📝 TODO List

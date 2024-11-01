@@ -18,8 +18,7 @@ from utils.trscan_process import process_trscan
 dict_1 = {}
 
 def create_scene_pcd(es_anno,pcd_result):
-    """Adding the embodiedscan-box annotation into
-        the point clouds data.
+    """Adding the embodiedscan-box annotation into the point clouds data.
 
     Args:
         es_anno (dict): The embodiedscan annotation of
@@ -75,20 +74,19 @@ def create_scene_pcd(es_anno,pcd_result):
 def process_one_scan(scan_id,save_root,scannet_root,\
     mp3d_root,trscan_root,scannet_matrix,mp3d_matrix,\
     trscan_matrix,mp3d_mapping):
-    """
-        Process the point clouds of one scan and
-        save in a pth file.
-        The pth file is a tuple of:
-            (1) aliged point clouds coordinates
-                shape (n,3)
-            (2) point clouds color ([0,1])
-                shape (n,3)
-            (3) point clouds label (int)
-                shape (n,1)
-            (4) point clouds object id (int)
-                shape (n,1)
-        Args:
-            scan_id (str): the scan id
+    """Process the point clouds of one scan and save in a pth file.
+
+    The pth file is a tuple of:
+        (1) aliged point clouds coordinates
+            shape (n,3)
+        (2) point clouds color ([0,1])
+            shape (n,3)
+        (3) point clouds label (int)
+            shape (n,1)
+        (4) point clouds object id (int)
+            shape (n,1)
+    Args:
+        scan_id (str): the scan id
     """
 
     if os.path.exists(f"{save_root}/{scan_id}.pth"):
@@ -161,7 +159,7 @@ if __name__ == '__main__':
     # loading the required scan id
     with open(f'{args.meta_path}/all_scan.json','r') as f:
         scan_id_list = json.load(f)
-   
+
     #(1) loading the axis matrix info
     mp3d_matrix = np.load(f'{args.meta_path}/mp3d_matrix.npy',\
         allow_pickle=True).item()

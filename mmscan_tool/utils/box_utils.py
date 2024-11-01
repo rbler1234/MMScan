@@ -9,9 +9,8 @@ except ImportError:
 
 
 def _axis_angle_rotation(axis: str, angle: np.ndarray) -> np.ndarray:
-    """
-    Return the rotation matrices for one of the rotations about an axis
-    of which Euler angles describe, for each value of the angle given.
+    """Return the rotation matrices for one of the rotations about an axis of
+    which Euler angles describe, for each value of the angle given.
 
     Args:
         axis: Axis label "X" or "Y or "Z".
@@ -39,8 +38,7 @@ def _axis_angle_rotation(axis: str, angle: np.ndarray) -> np.ndarray:
 
 
 def euler_angles_to_matrix(euler_angles: np.ndarray, convention: str) -> np.ndarray:
-    """
-    Convert rotations given as Euler angles in radians to rotation matrices.
+    """Convert rotations given as Euler angles in radians to rotation matrices.
 
     Args:
         euler_angles: Euler angles in radians as array of shape (..., 3).
@@ -67,12 +65,12 @@ def euler_angles_to_matrix(euler_angles: np.ndarray, convention: str) -> np.ndar
     return np.matmul(np.matmul(matrices[0], matrices[1]), matrices[2])
 
 def euler_to_matrix_np(euler):
-    """
-        Convert rotations given as Euler angles in radians to rotation matrices.
-        Args:
-            euler (np.ndarray) : (..., 3)
-        Returns:
-            np.ndarray : (..., 3, 3)
+    """Convert rotations given as Euler angles in radians to rotation matrices.
+
+    Args:
+        euler (np.ndarray) : (..., 3)
+    Returns:
+        np.ndarray : (..., 3, 3)
     """
     # euler: N*3 np array
     euler_tensor = torch.tensor(euler)
@@ -80,15 +78,15 @@ def euler_to_matrix_np(euler):
     return np.array(matrix_tensor)
 
 def is_inside_box(points, center, size, rotation_mat):
-    """
-        Check if points are inside a 3D bounding box.
-        Args:
-            points: 3D points, numpy array of shape (n, 3).
-            center: center of the box, numpy array of shape (3, ).
-            size: size of the box, numpy array of shape (3, ).
-            rotation_mat: rotation matrix of the box, numpy array of shape (3, 3).
-        Returns:
-            Boolean array of shape (n, ) indicating if each point is inside the box.
+    """Check if points are inside a 3D bounding box.
+
+    Args:
+        points: 3D points, numpy array of shape (n, 3).
+        center: center of the box, numpy array of shape (3, ).
+        size: size of the box, numpy array of shape (3, ).
+        rotation_mat: rotation matrix of the box, numpy array of shape (3, 3).
+    Returns:
+        Boolean array of shape (n, ) indicating if each point is inside the box.
     """
     assert points.shape[1] == 3, "points should be of shape (n, 3)"
     points = np.array(points) # n,3
@@ -103,8 +101,8 @@ def is_inside_box(points, center, size, rotation_mat):
     return (pcd_local[:, 0] <= 1) & (pcd_local[:, 1] <= 1) & (pcd_local[:, 2] <= 1)
 
 def normalize_box(scene_pcd, embodied_scan_bbox):
-    """Find the smallest 6 DoF box that covers these points
-       which 9 DoF box covers.
+    """Find the smallest 6 DoF box that covers these points which 9 DoF box
+    covers.
 
     Args:
         scene_pcd (Tensor / ndarray):
@@ -195,8 +193,7 @@ def euler_iou3d_corners(boxes1, boxes2):
     return iou3d
 
 def euler_iou3d_bbox(center1, size1, rot1, center2, size2, rot2):
-    """
-    Calculate the 3D IoU between two 9DOF bounding boxes.
+    """Calculate the 3D IoU between two 9DOF bounding boxes.
 
     Args:
         center1 (Tensor): (cx, cy, cz) of box1.

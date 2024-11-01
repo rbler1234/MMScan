@@ -7,6 +7,7 @@ from scipy.spatial.transform import Rotation as R
 def load_json(path:str):
 
     """Check the path and read the json file.
+
     Args:
         path (str): the path of the json file.
     Returns:
@@ -18,9 +19,8 @@ def load_json(path:str):
     return data
 
 def read_annotation_pickle(path:str, show_progress:bool =True):
-    """
-    Read annotation pickle file and return a dictionary, the embodiedscan annotation for
-    all scans in the split.
+    """Read annotation pickle file and return a dictionary, the embodiedscan
+    annotation for all scans in the split.
 
     Args:
         path (str): the path of the annotation pickle file.
@@ -141,9 +141,9 @@ def read_annotation_pickle(path:str, show_progress:bool =True):
 
 
 class id_mapping:
-    """
-       We rename the scan for consistency.
-       This class is used to map the original scan names to the new names.
+    """We rename the scan for consistency.
+
+    This class is used to map the original scan names to the new names.
     """
 
     def __init__(self, mp3d_mapping_path):
@@ -178,5 +178,3 @@ class id_mapping:
             return 'scannet/'+scan_name
         else:
             raise ValueError(f"{scan_name} is not a scan name")
-
-

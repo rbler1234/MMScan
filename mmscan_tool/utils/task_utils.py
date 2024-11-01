@@ -5,7 +5,7 @@ def anno_token_flatten(samples,keep_only_one=True):
 
     Args:
         samples (list of dict): The original VG samples.
-        keep_only_one (bool): 
+        keep_only_one (bool):
             Whether to keep only one positive token for each target.
             Defaults to True.
     Returns:

@@ -131,7 +131,8 @@ class simcse_evaluator():
 
 
     def __batch_evaluation__(self,all_pred,all_gt,gt_count):
-        """Using Sentence Embeddings to calculate similarity between pred/gt in a batch.
+        """Using Sentence Embeddings to calculate similarity between pred/gt in
+        a batch.
 
         Args:
             gt_count(list[int]): stores number of possible answers to a question
@@ -207,7 +208,8 @@ class sbert_evaluator():
         self.sbert_model = SentenceTransformer(model_path,device="cuda")
 
     def __batch_evaluation__(self,all_pred,all_gt,gt_count):
-        """Using Sentence-BERT to calculate similarity between pred/gt in a batch.
+        """Using Sentence-BERT to calculate similarity between pred/gt in a
+        batch.
 
         Args:
             gt_count(list[int]): stores number of possible answers to a question

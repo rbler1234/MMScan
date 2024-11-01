@@ -51,16 +51,15 @@ def average_precision(recalls, precisions, mode='area'):
     return ap
 
 def get_f1_scores(iou_matrix,iou_threshold):
-    """
-        Refer to the algorithm in Multi3DRefer to compute the F1 score.
+    """Refer to the algorithm in Multi3DRefer to compute the F1 score.
 
-        Args:
-            iou_matrix (ndarray/tensor):
-                the iou matrix of the predictions and ground truths (shape n*m)
-            iou_threshold (float): 0.25/0.5
+    Args:
+        iou_matrix (ndarray/tensor):
+            the iou matrix of the predictions and ground truths (shape n*m)
+        iou_threshold (float): 0.25/0.5
 
-        Returns:
-            float: the f1 score as the result
+    Returns:
+        float: the f1 score as the result
     """
     iou_thr_tp = 0
     pred_bboxes_count,gt_bboxes_count = iou_matrix.shape
@@ -86,18 +85,17 @@ def get_f1_scores(iou_matrix,iou_threshold):
 
 def __get_fp_tp_array__(iou_array,iou_threshold):
 
-    """
-        Compute the False-positive and True-positive array for each prediction.
+    """Compute the False-positive and True-positive array for each prediction.
 
-        Args:
-            iou_array (ndarray/tensor):
-                the iou matrix of the predictions and ground truths
-                (shape len(preds)*len(gts))
-            iou_threshold (float): 0.25/0.5
+    Args:
+        iou_array (ndarray/tensor):
+            the iou matrix of the predictions and ground truths
+            (shape len(preds)*len(gts))
+        iou_threshold (float): 0.25/0.5
 
-        Returns:
-            np.ndarray, np.ndarray: (len(preds)),
-            the false-positive and true-positive array for each prediction.
+    Returns:
+        np.ndarray, np.ndarray: (len(preds)),
+        the false-positive and true-positive array for each prediction.
     """
     gt_matched_records = np.zeros((len(iou_array[0])), dtype=bool)
     tp_thr = np.zeros((len(iou_array)))
@@ -137,9 +135,9 @@ def compute_for_subset(subset_results,iou_thr):
     total_gt_boxes = 0
     for i, sample_idx in enumerate(sample_indices):
         if sample_idx not in gt_matched_records:
-            gt_matched_records[sample_idx] = np.zeros((len(ious[i]),),dtype=bool)   
+            gt_matched_records[sample_idx] = np.zeros((len(ious[i]),),dtype=bool)
             total_gt_boxes += ious[i].shape[0]
-    
+
 
     confidences = np.array(confidences)
     sorted_inds = np.argsort(-confidences)
@@ -148,7 +146,7 @@ def compute_for_subset(subset_results,iou_thr):
 
     tp_thr = np.zeros(len(sample_indices))
     fp_thr = np.zeros(len(sample_indices))
-    
+
     for d, sample_idx in enumerate(sample_indices):
         iou_max = -np.inf
         cur_iou = ious[d]
@@ -159,8 +157,8 @@ def compute_for_subset(subset_results,iou_thr):
                 if iou > iou_max:
                     iou_max = iou
                     jmax = j
-        
-        
+
+
         if iou_max >= iou_thr:
             if not gt_matched_records[sample_idx][jmax]:
                 gt_matched_records[sample_idx][jmax] = True
@@ -169,12 +167,12 @@ def compute_for_subset(subset_results,iou_thr):
                 fp_thr[d] = 1.0
         else:
             fp_thr[d] = 1.0
-    
+
     fp = np.cumsum(fp_thr)
     tp = np.cumsum(tp_thr)
     recall = tp / float(total_gt_boxes)
     precision = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
-    
+
     return average_precision(recall, precision),np.max(recall)
 
 
@@ -236,5 +234,5 @@ def get_multi_topk_scores(iou_array, iou_threshold, mode='sigma'):
         else:
             query_index = min(num_gt*topk, len(topk_scores))-1
             result = np.sum(topk_scores[query_index]) / num_gt
-        topk_results[f'Acc_top{topk}@{iou_threshold}'] = result
+        topk_results[f'gTop-{topk}@{iou_threshold}'] = result
     return topk_results

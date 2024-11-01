@@ -24,15 +24,15 @@ def read_mesh_vertices_rgb(filename):
         vertices[:, 5] = plydata['vertex'].data['blue']
     return vertices
 def is_inside_box(points, center, size, rotation_mat):
-    """
-        Check if points are inside a 3D bounding box.
-        Args:
-            points: 3D points, numpy array of shape (n, 3).
-            center: center of the box, numpy array of shape (3, ).
-            size: size of the box, numpy array of shape (3, ).
-            rotation_mat: rotation matrix of the box, numpy array of shape (3, 3).
-        Returns:
-            Boolean array of shape (n, ) indicating if each point is inside the box.
+    """Check if points are inside a 3D bounding box.
+
+    Args:
+        points: 3D points, numpy array of shape (n, 3).
+        center: center of the box, numpy array of shape (3, ).
+        size: size of the box, numpy array of shape (3, ).
+        rotation_mat: rotation matrix of the box, numpy array of shape (3, 3).
+    Returns:
+        Boolean array of shape (n, ) indicating if each point is inside the box.
     """
     assert points.shape[1] == 3, "points should be of shape (n, 3)"
     center = np.array(center) # n, 3
@@ -45,9 +45,8 @@ def is_inside_box(points, center, size, rotation_mat):
     pcd_local = abs(pcd_local)
     return (pcd_local[:, 0] <= 1) & (pcd_local[:, 1] <= 1) & (pcd_local[:, 2] <= 1)
 def _axis_angle_rotation(axis: str, angle: np.ndarray) -> np.ndarray:
-    """
-    Return the rotation matrices for one of the rotations about an axis
-    of which Euler angles describe, for each value of the angle given.
+    """Return the rotation matrices for one of the rotations about an axis of
+    which Euler angles describe, for each value of the angle given.
 
     Args:
         axis: Axis label "X" or "Y or "Z".
@@ -75,8 +74,7 @@ def _axis_angle_rotation(axis: str, angle: np.ndarray) -> np.ndarray:
 
 
 def euler_angles_to_matrix(euler_angles: np.ndarray, convention: str) -> np.ndarray:
-    """
-    Convert rotations given as Euler angles in radians to rotation matrices.
+    """Convert rotations given as Euler angles in radians to rotation matrices.
 
     Args:
         euler_angles: Euler angles in radians as array of shape (..., 3).
@@ -103,12 +101,12 @@ def euler_angles_to_matrix(euler_angles: np.ndarray, convention: str) -> np.ndar
     return np.matmul(np.matmul(matrices[0], matrices[1]), matrices[2])
 
 def euler_to_matrix_np(euler):
-    """
-        Convert rotations given as Euler angles in radians to rotation matrices.
-        Args:
-            euler (np.ndarray) : (..., 3)
-        Returns:
-            np.ndarray : (..., 3, 3)
+    """Convert rotations given as Euler angles in radians to rotation matrices.
+
+    Args:
+        euler (np.ndarray) : (..., 3)
+    Returns:
+        np.ndarray : (..., 3, 3)
     """
     # euler: N*3 np array
     euler_tensor = torch.tensor(euler)

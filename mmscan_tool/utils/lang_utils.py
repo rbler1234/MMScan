@@ -3,12 +3,12 @@ import string
 
 def clean_answer(data):
 
-    """ Help to clean and unify the sentence.
+    """Help to clean and unify the sentence.
 
-        Args:
-            data (str): the raw sentence.
-        Returns:
-            data (str): the processed sentence.
+    Args:
+        data (str): the raw sentence.
+    Returns:
+        data (str): the processed sentence.
     """
 
     data = data.lower()
@@ -86,7 +86,8 @@ def normalize_answer(s):
     return white_space_fix(remove_articles(remove_punc(lower(s))))
 
 def exact_match_score(prediction, ground_truth):
-    """Collect the refined exact match score between prediction and ground truth.
+    """Collect the refined exact match score between prediction and ground
+    truth.
 
     Args:
         prediction (str): thr predicted answer.
@@ -106,7 +107,7 @@ def special_token_filter(lan,clean = True,truncation = True,max_length = 1024):
         Args:
             lan: List[str], language to be cleaned
             clean: bool, if apply LEO clean strategy
-            truncation: to avoid crash pycocoevalcap the 
+            truncation: to avoid crash pycocoevalcap the
                 input sentence will be truncated to max_length
             max_length: You may set this to the max length of possible gt answer
         """
@@ -136,7 +137,7 @@ def special_token_filter(lan,clean = True,truncation = True,max_length = 1024):
 
 def QA_prompt_define():
 
-    """Define the system prompt and example instance
+    """Define the system prompt and example instance.
 
     Returns:
         system_prompt : str, system prompt input into GPT
