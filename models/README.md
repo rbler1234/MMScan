@@ -17,7 +17,27 @@
     python -u scripts/train.py --use_color --eval_only --use_checkpoint "path/to/pth"
     ```
 ### EmbodiedScan
-TBD
+1. Follow the [EmbodiedScan](https://github.com/OpenRobotLab/EmbodiedScan/blob/main/README.md) to setup the Env. You need not load the datasets!
+
+2. Install MMScan API.
+
+
+3. Run the following command to train Scanrefer (multiple GPU):
+    ```bash
+    # Single GPU training
+    python tools/train.py configs/grounding/pcd_vg_mmscan.py --work-dir=path/to/save
+
+    # Multiple GPU training
+    python tools/train.py configs/grounding/pcd_vg_mmscan.py --work-dir=path/to/save --launcher="pytorch"
+    ```
+5. Run the following command to evaluate Scanrefer (multiple GPU):
+    ```bash
+    # Single GPU testing
+    python tools/test.py configs/grounding/pcd_vg_mmscan.py path/to/load_pth
+
+    # Multiple GPU testing
+    python tools/test.py configs/grounding/pcd_vg_mmscan.py path/to/load_pth --launcher="pytorch"
+    ```
 ## Question Answering Models
 
 ### LL3DA
